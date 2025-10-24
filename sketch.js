@@ -18,8 +18,7 @@
 // 📜 Startercode: Doug L. James, djames@cs.stanford.edu
 // 🍂 Fall 2025
 /****************************************************************************************
- 🙋 Names:
-  - [Your name(s)]
+ 🙋 Names: Jameson Yee, Basant Khalil
 
  ✨ Features:
   - [Explain features you implemented so we don’t miss them]
@@ -35,15 +34,15 @@ console.log("⚠️ Fill out the writeup comment block! ⚠️");
 
 p5.friendlyErrorSystem = false;
 
-const MAX_BLOBS = 100; // 👀 TODO: 100 or more to complete "Attack of the Blobs!" challenge. Use just a few for testing. 
+const MAX_BLOBS = 1; // 👀 TODO: 100 or more to complete "Attack of the Blobs!" challenge. Use just a few for testing. 
 
 /// TIP: TURN OFF PEGS + SPIKES UNTIL YOU ARE READY:
-const PEGS = true; // 👀 Turns on pachinko pegs. Bonk!
-const SPIKES = true; // 👀 Turns on the spike pit and replaces pachinko peges with spikes!! 😲 Bwaahahahahaha!!!
+const PEGS = false; // 👀 Turns on pachinko pegs. Bonk!
+const SPIKES = false; // 👀 Turns on the spike pit and replaces pachinko peges with spikes!! 😲 Bwaahahahahaha!!!
 const DRAW_BLOB_PARTICLES = true;
 
 /// STIFFNESS PARAMETERS TO TWEAK: 🤨
-const STIFFNESS_STRETCH = 1.0; // 👀 TODO: Set as you wish
+const STIFFNESS_STRETCH = -20000.0; // 👀 TODO: Set as you wish
 const STIFFNESS_BEND = 1.0; //    👀 TODO: Set as you wish
 const STIFFNESS_AREA = 1.0; //    👀 TODO: Set as you wish
 

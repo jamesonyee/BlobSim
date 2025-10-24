@@ -48,14 +48,28 @@ class Blob {
 		return this.BP;
 	}
 
-	// Loops over blob edges and accumulates stretch forces (Particle.f += ...)
+	// Loops over blob edges and accumulates stretch forces (Particle.f += ...)                      
 	gatherForces_Stretch() {
-		let k = STIFFNESS_STRETCH;
-		for (let edge of this.BE) {
-			// 👀 TODO
+	let k = STIFFNESS_STRETCH;  
+	for (let edge of this.BE) {
+		let p0 = edge.q;
+		let p1 = edge.r;
 
+		let delta = vsub(p1.p, p0.p);
+		let L = delta.mag();
+		let L0 = edge.restLength;
+		if (L === 0) continue;
+		
+			let dir = vmult(delta, 1 / L);
+
+			let stretch = L - L0;
+			let force = vmult(dir, k * stretch);
+
+			vacc(p0.f, 1, force);
+			vacc(p1.f, -1, force);
 		}
 	}
+
 	// Loops over blob particles and accumulates bending forces (Particle.f += ...)
 	gatherForces_Bend() {
 		let k = STIFFNESS_BEND;
