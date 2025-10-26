@@ -178,17 +178,48 @@ class Blob {
 
 	drawBlobFace() {
 		push();
-		// 👀 TODO: Draw your face here! :D 
-
-		// CENTER OF MASS eyeball for now :/
 		let com = this.centerOfMass();
+		let r = this.radius;
+
+		// Base rotation based on movement direction (optional, fun look)
 		let cov = this.centerOfVelocity();
-		stroke(0);
-		fill(255);
-		circle(com.x, com.y, 5 * PARTICLE_RADIUS);
+		let faceAngle = atan2(cov.y, cov.x) * 0.2;
+
+		translate(com.x, com.y);
+		rotate(faceAngle);
+
+		// ---- EYES ----
+		noStroke();
+		fill(255); // white part
+		let eyeOffsetX = 0.35 * r;
+		let eyeOffsetY = -0.2 * r;
+		let eyeSize = 0.3 * r;
+
+		// Left eye
+		ellipse(-eyeOffsetX, eyeOffsetY, eyeSize, eyeSize * 1.1);
+		// Right eye
+		ellipse(eyeOffsetX, eyeOffsetY, eyeSize, eyeSize * 1.1);
+
+		// Pupils
 		fill(0);
-		circle(com.x + 0.01 * cov.x + 0.005 * sin(nTimesteps / 3), com.y + 0.01 * cov.y + 0.001 * random(-1, 1), PARTICLE_RADIUS);
+		let pupilSize = 0.15 * r;
+		let pupilOffset = 0.05 * r * sin(frameCount * 0.05); // small movement for life
+		ellipse(-eyeOffsetX + pupilOffset, eyeOffsetY - pupilOffset, pupilSize);
+		ellipse(eyeOffsetX + pupilOffset, eyeOffsetY - pupilOffset, pupilSize);
+
+		// ---- MOUTH ----
+		fill(0);
+		let mouthY = 0.2 * r;
+		let mouthW = 0.5 * r;
+		let mouthH = 0.5 * r;
+		arc(0, mouthY, mouthW, mouthH, 0, PI, CHORD);
+		
+		fill(255, 100, 150); // light pink
+		let tongueW = mouthW * 0.3;
+		let tongueH = mouthH * 0.5;
+		let tongueY = mouthY + mouthH * 0.6; // slightly lower inside mouth
+		arc(0, tongueY, tongueW, tongueH, PI, TWO_PI, CHORD);
+
 		pop();
 	}
-
 }
