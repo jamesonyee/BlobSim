@@ -75,13 +75,22 @@ class Blob {
 	gatherForces_Bend() {
 		let k = STIFFNESS_BEND;
 		for (let i = 0; i < this.n; i++) {
-			// FIND particles before (p0) and after (p2) particle i (p1): 
-			//let p0 = ????
-			let p1 = this.BP[i];
-			let p2 = this.BP[(i + 1) % this.n];
-
-			// 👀 TODO
-
+			let p0 = this.BP[(i - 1 + this.n) % this.n]; // p(i-1)
+			let p2 = this.BP[(i + 1) % this.n];          // p(i+1)
+			
+			// Spring between p0 and p2 to resist bending at p1
+			let delta = vsub(p2.p, p0.p);
+			let L = delta.mag();
+			let L0 = 2.0 * this.radius * sin(PI / this.n); // Rest length for straight configuration
+			
+			if (L === 0) continue;
+			
+			let dir = vmult(delta, 1 / L);
+			let stretch = L - L0;
+			let force = vmult(dir, k * stretch);
+			
+			vacc(p0.f, 1, force);
+			vacc(p2.f, -1, force);
 		}
 	}
 	// Loops over blob particles and gathers area compression forces (Particle.f += ...)
