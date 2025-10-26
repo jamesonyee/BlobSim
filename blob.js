@@ -61,9 +61,10 @@ class Blob {
 		if (L === 0) continue;
 		
 			let dir = vmult(delta, 1 / L);
-
 			let stretch = L - L0;
 			let force = vmult(dir, k * stretch);
+
+			//console.log("Force magnitude:", force.mag());
 
 			vacc(p0.f, 1, force);
 			vacc(p1.f, -1, force);

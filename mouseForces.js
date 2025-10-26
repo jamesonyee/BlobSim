@@ -23,6 +23,21 @@ function mousePressed() {
 		}
 	}
 	mouseBlob = minBlob;
+
+	if (mouseBlob) {
+        let deformationForce = 5000.0; // Strong force
+        let P = mouseBlob.blobParticles();
+        
+        // Apply outward forces in different directions to stretch the blob
+        for (let i = 0; i < P.length; i++) {
+            let particle = P[i];
+            let dir = vsub(particle.p, minCOM).normalize(); // Direction from center to particle
+            let force = vmult(dir, deformationForce);
+            particle.f.add(force);
+		}
+	console.log("Applied deformation force!");
+
+	}
 }
 
 function mouseReleased() {

@@ -42,7 +42,7 @@ const SPIKES = false; // 👀 Turns on the spike pit and replaces pachinko peges
 const DRAW_BLOB_PARTICLES = true;
 
 /// STIFFNESS PARAMETERS TO TWEAK: 🤨
-const STIFFNESS_STRETCH = -20000.0; // 👀 TODO: Set as you wish
+const STIFFNESS_STRETCH = 10000; // 👀 TODO: Set as you wish
 const STIFFNESS_BEND = 1.0; //    👀 TODO: Set as you wish
 const STIFFNESS_AREA = 1.0; //    👀 TODO: Set as you wish
 
@@ -52,7 +52,7 @@ const WIDTH = 1.0;
 const HEIGHT = 1.0;
 const PARTICLE_RADIUS = WIDTH / 400.0; // for rendering
 const PARTICLE_MASS = 1.0;
-const BLOB_PARTICLES = 25;//(F25)  //15 (F24) // 12 (F22) // #particles per blob
+const BLOB_PARTICLES = 12;//(F25)  //15 (F24) // 12 (F22) // #particles per blob
 const BLOB_RADIUS = WIDTH / 21; // WIDTH / 23; (F24) // WIDTH / 25; (F22/23)
 
 //////// IMPORTANT ARRAYS OF THINGS /////////
@@ -214,7 +214,7 @@ function gatherParticleForces_Penalty() {
 }
 
 function gatherParticleForces_Gravity() {
-	let g = vec2(0, 0.1); // weak grav accel -- they kinda float (my uncle says they are hollow and made of f*rts)
+	let g = vec2(0, 1.0); // weak grav accel -- they kinda float (my uncle says they are hollow and made of f*rts)
 	for (let particle of particles)
 		vacc(particle.f, particle.mass, g); // f += m g
 }
