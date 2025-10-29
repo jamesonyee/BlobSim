@@ -15,6 +15,11 @@ function verifyNoEdgeEdgeOverlap() {
 		let ei = edges[i];
 		for (let j = i + 1; j < edges.length; j++) {
 			let ej = edges[j];
+			
+
+        if (ei.q.blob != null && ej.q.blob != null && ei.q.blob === ej.q.blob) {
+            continue; // Ignore self-collisions
+        }
 			if (checkEdgeEdgeOverlap(ei, ej)) { // HALT!
 				detectedEdgeEdgeFailure = true;
 				isPaused = true;
@@ -25,16 +30,12 @@ function verifyNoEdgeEdgeOverlap() {
 }
 
 let overlapEdges = null;
-/// IMPLEMENTATION (yeinj (F23))
+
 function checkEdgeEdgeOverlap(ei, ej) {
 
 	if (ei.isRigid() && ej.isRigid()) {
 		return false;
 	}
-
-	// if (ei.blobId === ej.blobId) {
-	// 	return false;
-	// }
 
 	let r = vsub(ei.r.p, ei.q.p);
 	let s = vsub(ej.r.p, ej.q.p);
