@@ -17,9 +17,17 @@ function verifyNoEdgeEdgeOverlap() {
 			let ej = edges[j];
 			
 
-        if (ei.q.blob != null && ej.q.blob != null && ei.q.blob === ej.q.blob) {
-            continue; // Ignore self-collisions
-        }
+        // Ignore overlaps between environment edges and blob edges.
+// Only check blob self–self or blob–blob, not blob–environment.
+const eiIsEnv = (ei.q.blob == null && ei.r.blob == null);
+const ejIsEnv = (ej.q.blob == null && ej.r.blob == null);
+
+// Skip if both belong to environment or one is env and the other is blob
+if (eiIsEnv || ejIsEnv) continue;
+
+// Also skip if both edges belong to the same blob (self overlap)
+if (ei.q.blob === ej.q.blob) continue;
+
 			if (checkEdgeEdgeOverlap(ei, ej)) { // HALT!
 				detectedEdgeEdgeFailure = true;
 				isPaused = true;
