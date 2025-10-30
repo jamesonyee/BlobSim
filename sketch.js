@@ -36,7 +36,7 @@ p5.friendlyErrorSystem = false;
 const MAX_BLOBS = 10; // 👀 TODO: 100 or more to complete "Attack of the Blobs!" challenge. Use just a few for testing. 
 
 /// TIP: TURN OFF PEGS + SPIKES UNTIL YOU ARE READY:
-const PEGS = true;   // Turns on pachinko pegs
+const PEGS = false;   // Turns on pachinko pegs
 const SPIKES = true; // Turns on the spike pit!!
 const DRAW_BLOB_PARTICLES = true;
 

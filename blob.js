@@ -357,6 +357,7 @@ class Blob {
 		// --- 1. Find a stable center and orientation ---
 		let com = this.centerOfMass();
 		let cov = this.centerOfVelocity();
+		let r = BLOB_RADIUS * 0.2; // Scale for face features
 
 		// Calculate an "up" vector. We can average the vectors from the
 		// center of mass to each particle. This gives a stable orientation.
@@ -421,6 +422,32 @@ class Blob {
 			fill(0); // Pupil
 			circle(rightEyePos.x + lookDir.x, rightEyePos.y + lookDir.y, this.pupilSize);
 		}
+		
+		// ---- MOUTH ----
+		// Position mouth relative to blob orientation (like the eyes)
+		let mouthOffset = vmult(up, 1.5 * r); // Move down from center in blob's "up" direction
+		let mouthPos = vadd(com, mouthOffset);
+
+		// Calculate the angle of the blob's orientation
+		let angle = atan2(up.y, up.x) - PI/2; // up vector angle + 90° to make it vertical
+
+		// Save current transformation
+		push();
+		// Move to mouth position and rotate
+		translate(mouthPos.x, mouthPos.y);
+		rotate(angle);
+
+		// Outer mouth (black)
+		fill(0);
+		let mouthW = 1.5 * r;
+		let mouthH = 1.5 * r;
+		arc(0, 0, mouthW, mouthH, 0, PI, CHORD); // Draw at (0,0) since we translated
+
+		// Inner mouth (pink)
+		fill(255, 192, 203); // Pink color
+		let innerMouthW = mouthW * 0.7; // Slightly smaller
+		let innerMouthH = mouthH * 0.6;
+		arc(0, 0, innerMouthW, innerMouthH, 0, PI, CHORD); // Draw at (0,0)
 
 		pop();
 	}
