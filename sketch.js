@@ -40,7 +40,7 @@ const PEGS = true;
 const DRAW_BLOB_PARTICLES = true;
 
 const STIFFNESS_STRETCH  = 180.0;   
-const STIFFNESS_AREA = 10.0;
+const STIFFNESS_AREA = 30.0;
 const STIFFNESS_BEND = 2.5;
 
 const STIFFNESS_PENALTY = 2000.0;
@@ -104,7 +104,7 @@ function draw() {
 			}
 
 			let dtFrame = 0.004;   // smaller step
-			let nSubsteps = 12;    // more sub-iterations
+			let nSubsteps = 20;    // more sub-iterations
 
 			for (let step = 0; step < nSubsteps; step++)
 				advanceTime(dtFrame / nSubsteps);
@@ -264,9 +264,14 @@ function processPenalty(p, edge, k_p, k_d, d0) {
 	if (d < 1e-6) return;
 	let penetration = d0 - d;
 
-	if (penetration > 0) {
+	if (edge.length() < 0.05 && edge.isRigid()) {
+	    k_p *= 0.4; // reduce stiffness for short "spike" edges
+	}
+
+	if (penetration > 0 && d < d0 * 0.95) {
 		let n = vmult(v_pc, 1.0 / d);
-		let f_spring = k_p * penetration * 2.0; // stronger push from rigid edges
+		let depthScale = map(penetration, 0, d0, 0, 3.0, true);
+		let f_spring = k_p * penetration * (0.5 + depthScale);
 		let v_rel = p.v;
 
 		if (!edge.isRigid()) {
@@ -287,7 +292,19 @@ function processPenalty(p, edge, k_p, k_d, d0) {
 		let f_mag = f_spring + f_damp;
 		if (f_mag < 0) f_mag = 0;
 		let f_penalty = vmult(n, f_mag);
+		if (edge.isRigid() && penetration > d0 * 0.6) {
+		    let push = vmult(n, 0.2 * penetration);
+		    p.p.add(push);
+		}
+
 		p.f.add(f_penalty);
+			
+		// --- Tangential friction to allow deformation around spikes ---
+		let tangent = vec2(-n.y, n.x);
+		let v_t = v_rel.dot(tangent);
+		let f_friction = vmult(tangent, -0.5 * k_d * v_t);
+		p.f.add(f_friction);
+
 
 		if (!edge.isRigid()) {
 			if (!edge.q.pin) vacc(edge.q.f, -(1.0 - t), f_penalty);
@@ -318,7 +335,7 @@ function processImpulse(p, edge, e, dt) {
 
     const penetration = PARTICLE_RADIUS - d;
     const v_n = v_rel.dot(n);
-    if (penetration <= 0 || v_n > 0) return; // only act on actual impacts
+	if (penetration <= -PARTICLE_RADIUS * 0.3 || v_n > 0) return;
 
     const invMass_p = p.invMass();
     let invMass_edge = 0;
@@ -390,7 +407,7 @@ function gatherParticleForces_Penalty() {
 
 
 function gatherParticleForces_Gravity() {
-    let g = vec2(0, 1.4);  // was 1.2
+	 let g = vec2(0, 1.1);
     for (let particle of particles)
         vacc(particle.f, particle.mass, g);
 }
