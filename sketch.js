@@ -78,8 +78,9 @@ let detectedEdgeEdgeFailure = false;
 let bgImage;
 
 function preload() {
-	bgImage = loadImage('graphpaper.jpg');
+  bgImage = loadImage('night_forest_pumpkin.png');
 }
+
 
 function setup() {
 	createCanvas(CANVAS_SIZE, CANVAS_SIZE);
@@ -121,7 +122,36 @@ function draw() {
 			drawMouseForce();
 			drawOverlapEdges();
 		}
+
+		// 💡 subtle screen-wide light flicker
+push();
+blendMode(ADD);
+fill(255, 80, 0, 8 + 8 * sin(frameCount * 0.1));
+rect(0, 0, width, height);
+pop();
+
 	}
+// 🌫️ rolling fog with noise pattern (adds depth + moonlight shimmer)
+push();
+noStroke();
+for (let y = 0; y < height; y += 20) {
+  // vary opacity per row for animated mist bands
+  let fogRow = 20 + 15 * noise(frameCount * 0.005, y * 0.02);
+  fill(255, 150, 80, fogRow); // warmer orange mist
+  rect(0, y, width, 20);
+}
+pop();
+
+
+	push();
+textAlign(CENTER);
+textSize(48);
+fill(255, 120, 0, 180);
+	fill(255, 80 + 80 * sin(frameCount * 0.05), 0, 180);
+
+text("🎃 Attack of the Blobs: Haunted Harvest 🎃", width / 2, 60);
+pop();
+
 	pop();
 
 	push();
@@ -279,12 +309,6 @@ function processPenalty(p, edge, k_p, k_d, d0) {
 			let v_r = edge.r.v;
 			let v_edge_point = vadd(vmult(v_q, 1.0 - t), vmult(v_r, t));
 			v_rel = vsub(p.v, v_edge_point);
-		}
-
-		if (edge.isRigid()) {
-		  stroke('red');
-		  line(edge.q.p.x, edge.q.p.y, edge.r.p.x, edge.r.p.y);
-		  stroke('white');
 		}
 
 		let v_n = v_rel.dot(n);
