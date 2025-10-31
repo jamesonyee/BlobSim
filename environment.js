@@ -50,12 +50,16 @@ class Environment {
 			}
 
 			// (F24) SPIKES AT BOTTOM, TOO, IS SO 2024 😲: 
-			if (SPIKES) {
-				let n = 20;
-				for (let i = 1; i < n; i++) {
-					this.createSpike(WIDTH * (i / n), HEIGHT, 0.02);
-				}
-			}
+// (F24) 🦴 Replace bottom spikes with skeletal hands emerging from the ground
+if (SPIKES) {
+  let n = 18;
+  for (let i = 1; i < n; i++) {
+    let x = WIDTH * (i / n);
+    if (i % 2 == 0) this.createSkeletonHand(x, HEIGHT, 0.018);
+    else this.createSpike(x, HEIGHT, 0.018); // occasional candle still allowed
+  }
+}
+
 		}
 	}
 
@@ -120,6 +124,39 @@ class Environment {
 		this.envParticles.push(p1);
 		this.envEdges.push(e01);
 	}
+	// 🦴 Creates a multi-finger skeletal hand reaching upward
+	createSkeletonHand(x, y, r) {
+	  const boneColor = color(250, 240, 220);
+	
+	  // Anchor "wrist" base
+	  let wrist = createParticle(x, y);
+	  wrist.pin = true;
+	  this.envParticles.push(wrist);
+	
+	  // 5 fingers spread slightly
+	  for (let f = -2; f <= 2; f++) {
+	    let offset = f * r * 0.5;
+	    let base = createParticle(x + offset, y - r * 0.1);
+	    base.pin = true;
+	    this.envParticles.push(base);
+	
+	    let prev = base;
+	    let segments = 3 + (abs(f) % 2); // vary finger length a little
+	
+	    for (let j = 0; j < segments; j++) {
+	      let joint = createParticle(x + offset + random(-0.001, 0.001),
+	                                 y - r * (0.5 + j * 0.35));
+	      let e = createEdge(prev, joint);
+	      e.isBone = true;
+	      e.color = boneColor;
+	      e.glowPhase = random(TWO_PI);
+	      this.envEdges.push(e);
+	      this.envParticles.push(joint);
+	      prev = joint;
+	    }
+	  }
+	}
+
 
 	// Updates any moveable infinite-mass rigid elements
 	advanceTime(dt) {}
@@ -127,6 +164,14 @@ class Environment {
 	// Makes popcorn <jk> no it doesn't... 
 	draw() {
 		push();
+		// Animate bones slightly (small finger wiggle)
+		for (let edge of this.envEdges) {
+		  if (edge.isBone) {
+		    edge.q.p.y += 0.0004 * sin(frameCount * 0.7 + edge.glowPhase);
+		    edge.r.p.y += 0.0003 * sin(frameCount * 0.9 + edge.glowPhase);
+		  }
+		}
+
 		// 🌲 Full Halloween forest backdrop (draw first)
 		push();
 
@@ -238,7 +283,28 @@ class Environment {
 		
 		  }
 		}
-				
+		// 🦴 Skeletal hands (matte ivory, defined bones)
+		push();
+		blendMode(BLEND);
+		noFill();
+		drawingContext.shadowBlur = 0;
+		
+		for (let edge of this.envEdges) {
+		  if (edge.isBone) {
+		    let flicker = 230 + 15 * sin(frameCount * 0.2 + edge.glowPhase);
+		    stroke(250, 240, 220, flicker);
+		    strokeWeight(PARTICLE_RADIUS * 1.5);
+		    line(edge.q.p.x, edge.q.p.y, edge.r.p.x, edge.r.p.y);
+		
+		    // Joint highlights (tiny bone heads)
+		    noStroke();
+		    fill(250, 240, 220, 180);
+		    ellipse(edge.q.p.x, edge.q.p.y, PARTICLE_RADIUS * 1.2);
+		    ellipse(edge.r.p.x, edge.r.p.y, PARTICLE_RADIUS * 1.2);
+		  }
+		}
+		pop();
+
 		pop();
 
 
@@ -283,13 +349,6 @@ class Environment {
 			}
 		}
 		drawingContext.shadowBlur = 0;
-		for (let edge of this.envEdges) {
-		  if (edge.length() < 0.05) { // short spikes
-		    let glow = 100 + 80 * sin(frameCount * 0.1 + (edge.glowPhase || 0));
-		    stroke(255, 180, 80, glow);
-		    line(edge.q.p.x, edge.q.p.y, edge.r.p.x, edge.r.p.y);
-		  }
-		}
 
 		pop(); // wait, it does pop :/ 
 	}
