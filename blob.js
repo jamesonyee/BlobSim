@@ -39,17 +39,16 @@ class Blob {
 
 		// SETUP YOUR APPEARANCE/FACIAL ELEMENTS:
 		// 👀 TODO
-	// 🎃 Halloween pumpkin orange tones
-let dc = 25;
-// 🎃 Randomly choose pumpkin, ghost, or slime tone
-const palette = [
-    color(255, 130 + random(-10, 10), 0),      // pumpkin
-    color(200 + random(-20, 20), 255, 240),   // ghostly white
-    color(100 + random(-20, 10), 255, 100)    // eerie green slime
-];
-this.fillColor = random(palette);
-
-
+		// 🎃 Halloween pumpkin orange tones
+		let dc = 25;
+		// 🎃 Randomly choose pumpkin, ghost, or slime tone
+		const palette = [
+		    color(255, 130 + random(-10, 10), 0),      // pumpkin
+		    color(200 + random(-20, 20), 255, 240),   // ghostly white
+		    color(100 + random(-20, 10), 255, 100)    // eerie green slime
+		];
+		this.fillColor = random(palette);
+		
 
 		// Rest Area
 		let sum = 0;
@@ -138,30 +137,30 @@ this.fillColor = random(palette);
 			p2.f = vadd(p2.f, f2);
 		}
 	}
-
-gatherForces_Area() {
-    const k = STIFFNESS_AREA;
-    // --- compute current signed area ---
-    let A = 0;
-    for (let i = 0; i < this.n; i++) {
-        const p0 = this.BP[i].p;
-        const p1 = this.BP[(i + 1) % this.n].p;
-        A += (p0.x * p1.y - p1.x * p0.y);
-    }
-    A *= 0.5;
-
-    const areaDiff = (A - this.A0);
-
-    // --- apply corrective pressure to each vertex ---
-    for (let i = 0; i < this.n; i++) {
-        const pPrev = this.BP[(i - 1 + this.n) % this.n];
-        const pNext = this.BP[(i + 1) % this.n];
-        const edge = vsub(pNext.p, pPrev.p);
-        const n = vec2(-edge.y, edge.x);        // outward normal
-        const f = vmult(n, -k * areaDiff / this.n); // distribute evenly
-        this.BP[i].f.add(f);
-    }
-}
+	
+	gatherForces_Area() {
+	    const k = STIFFNESS_AREA;
+	    // --- compute current signed area ---
+	    let A = 0;
+	    for (let i = 0; i < this.n; i++) {
+	        const p0 = this.BP[i].p;
+	        const p1 = this.BP[(i + 1) % this.n].p;
+	        A += (p0.x * p1.y - p1.x * p0.y);
+	    }
+	    A *= 0.5;
+	
+	    const areaDiff = (A - this.A0);
+	
+	    // --- apply corrective pressure to each vertex ---
+	    for (let i = 0; i < this.n; i++) {
+	        const pPrev = this.BP[(i - 1 + this.n) % this.n];
+	        const pNext = this.BP[(i + 1) % this.n];
+	        const edge = vsub(pNext.p, pPrev.p);
+	        const n = vec2(-edge.y, edge.x);        // outward normal
+	        const f = vmult(n, -k * areaDiff / this.n); // distribute evenly
+	        this.BP[i].f.add(f);
+	    }
+	}
 	
 	updateBound(dt) {
 	  if (this.BP.length === 0) return;
@@ -243,51 +242,153 @@ gatherForces_Area() {
 	}
 
 	draw() {
-		push();
-		strokeWeight(PARTICLE_RADIUS);
-		stroke("DarkOrchid");
-let alpha = this.hit ? 160 : 220;
-fill(red(this.fillColor), green(this.fillColor), blue(this.fillColor), alpha);
-		{
-			// Glowing body core
-drawingContext.shadowBlur = 40;
-drawingContext.shadowColor = color(red(this.fillColor), green(this.fillColor), blue(this.fillColor));
-
-			beginShape(TESS);
-			for (let particle of this.BP) vertex(particle.p.x, particle.p.y);
-			endShape(CLOSE);
-		}
-		if (DRAW_BLOB_PARTICLES) {
-			fill("DarkOrchid");
-			if (this.hit == true) {
-    stroke("orange");
-    fill("orangered");  // shows visual stress under contact
-}
-
-			// subtle pulse under stress
-if (this.hit) {
-    this.fillColor = color(
-        255,
-        60 + 60 * sin(frameCount * 0.2),
-        0
-    );
-}
-
-			for (let particle of this.BP) circle(particle.p.x, particle.p.y, PARTICLE_RADIUS);
-		}
-		this.drawBlobFace();
-		this.drawBound();
-		drawingContext.shadowBlur = 0;
-
-		pop();
+	  push();
+	
+	  strokeWeight(PARTICLE_RADIUS);
+	  stroke(50, 0, 80, 80);
+	
+	  // keep particles visible + glowing
+	  let alpha = this.hit ? 180 : 230;
+	  let flicker = 0.6 + 0.4 * sin(frameCount * 0.15 + this.blobIndex);
+	  let theme = this.theme || ["ghost","pumpkin","skull"][floor(random(3))];
+	  this.theme = theme; // freeze per blob
+	
+	  // === choose palette per type ===
+	  if (theme === "ghost") this.fillColor = color(200, 240, 255, alpha * 0.7);
+	  if (theme === "pumpkin") this.fillColor = color(255, 120 + 30*sin(frameCount*0.2), 0, alpha);
+	  if (theme === "skull") this.fillColor = color(245, 245, 230, alpha * 0.8);
+	
+	  // === draw outer shape ===
+	  drawingContext.shadowBlur = 30;
+	  drawingContext.shadowColor =
+	    theme === "ghost" ? "rgba(180,220,255,0.9)" :
+	    theme === "pumpkin" ? "rgba(255,130,0,0.9)" :
+	    "rgba(255,255,255,0.6)";
+	
+	  beginShape();
+	  for (let p of this.BP) vertex(p.p.x, p.p.y);
+	  endShape(CLOSE);
+	
+	  // --- visible particles integrated into body ---
+	  for (let p of this.BP) {
+	    noStroke();
+	    if (theme === "ghost") fill(220, 255, 255, 80 + 40*sin(frameCount*0.3));
+	    if (theme === "pumpkin") fill(255, 100, 0, 120 + 60*sin(frameCount*0.3));
+	    if (theme === "skull") fill(255, 255, 255, 100 + 40*sin(frameCount*0.3));
+	    circle(p.p.x, p.p.y, PARTICLE_RADIUS * 1.5);
+	  }
+	
+	  // === per-theme facial design ===
+	  if (theme === "ghost") this.drawGhostFace();
+	  else if (theme === "pumpkin") this.drawPumpkinFace();
+	  else this.drawSkullFace();
+	
+	  this.drawBound();
+	  drawingContext.shadowBlur = 0;
+	  pop();
 	}
+	
+	
+	//------------------------------------------------------
+	// 👻 GHOST FACE — floating soul
+	//------------------------------------------------------
+	drawGhostFace() {
+	  push();
+	  let c = this.centerOfMass();
+	  noStroke();
+	
+	  // hollow eyes
+	  fill(0, 0, 0, 220);
+	  ellipse(c.x - 0.015, c.y - 0.01, 0.018, 0.024);
+	  ellipse(c.x + 0.015, c.y - 0.01, 0.018, 0.024);
+	
+	  // soft mouth
+	  fill(0, 0, 0, 160);
+	  ellipse(c.x, c.y + 0.018, 0.022, 0.012);
+	
+	  // faint cyan glow around eyes
+	  drawingContext.shadowBlur = 25;
+	  drawingContext.shadowColor = "rgba(180,255,255,0.8)";
+	  noFill();
+	  stroke(180, 255, 255, 80);
+	  strokeWeight(0.003);
+	  ellipse(c.x - 0.015, c.y - 0.01, 0.025);
+	  ellipse(c.x + 0.015, c.y - 0.01, 0.025);
+	  pop();
+	}
+	
+	
+	//------------------------------------------------------
+	// 🎃 PUMPKIN FACE — jack-o’-lantern
+	//------------------------------------------------------
+	drawPumpkinFace() {
+	  push();
+	  let c = this.centerOfMass();
+	  drawingContext.shadowBlur = 30;
+	  drawingContext.shadowColor = "rgba(255,120,0,0.9)";
+	  stroke(0);
+	  strokeWeight(0.001);
+	  fill(0);
+	
+	  // triangle eyes
+	  beginShape();
+	  vertex(c.x - 0.02, c.y - 0.01);
+	  vertex(c.x - 0.01, c.y - 0.03);
+	  vertex(c.x, c.y - 0.01);
+	  endShape(CLOSE);
+	  beginShape();
+	  vertex(c.x + 0.02, c.y - 0.01);
+	  vertex(c.x + 0.01, c.y - 0.03);
+	  vertex(c.x, c.y - 0.01);
+	  endShape(CLOSE);
+	
+	  // jagged grin
+	  noFill();
+	  stroke(255, 120 + 60*sin(frameCount*0.3), 0);
+	  strokeWeight(0.004);
+	  beginShape();
+	  for (let i = -3; i <= 3; i++) {
+	    let x = c.x + i * 0.006;
+	    let y = c.y + 0.02 + 0.004 * ((i % 2 == 0) ? 1 : -1);
+	    vertex(x, y);
+	  }
+	  endShape();
+	  pop();
+	}
+	
+	
+	//------------------------------------------------------
+	// 💀 SKULL FACE — eerie bone wisp
+	//------------------------------------------------------
+	drawSkullFace() {
+	  push();
+	  let c = this.centerOfMass();
+	  drawingContext.shadowBlur = 20;
+	  drawingContext.shadowColor = "rgba(255,255,255,0.7)";
+	  noStroke();
+	  fill(0);
+	  ellipse(c.x - 0.015, c.y - 0.01, 0.018);
+	  ellipse(c.x + 0.015, c.y - 0.01, 0.018);
+	
+	  // nose hole
+	  triangle(c.x - 0.004, c.y + 0.002, c.x + 0.004, c.y + 0.002, c.x, c.y + 0.008);
+	
+	  // teeth lines
+	  stroke(0);
+	  strokeWeight(0.002);
+	  for (let i = -3; i <= 3; i++) {
+	    line(c.x + i*0.004, c.y + 0.018, c.x + i*0.004, c.y + 0.023);
+	  }
+	  pop();
+	}
+
 
 	drawBlobFace() {
 		push();
 		// Candle glow pulsation
-let flicker = 0.8 + 0.2 * sin(frameCount * 0.3 + random(0, 1));
-drawingContext.shadowBlur = 25 * flicker;
-drawingContext.shadowColor = "orange";
+		let flicker = 0.8 + 0.2 * sin(frameCount * 0.3 + random(0, 1));
+		drawingContext.shadowBlur = 25 * flicker;
+		drawingContext.shadowColor = "orange";
 
 		let com = this.centerOfMass();
 		let cov = this.centerOfVelocity();
