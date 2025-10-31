@@ -39,13 +39,17 @@ class Blob {
 
 		// SETUP YOUR APPEARANCE/FACIAL ELEMENTS:
 		// 👀 TODO
-		let dc = 26;
-		this.fillColor = color([
-			221 + random(-dc, dc),
-			160 + random(-dc, dc),
-			221 + random(-dc, dc),
-			255
-		]);
+	// 🎃 Halloween pumpkin orange tones
+let dc = 25;
+// 🎃 Randomly choose pumpkin, ghost, or slime tone
+const palette = [
+    color(255, 130 + random(-10, 10), 0),      // pumpkin
+    color(200 + random(-20, 20), 255, 240),   // ghostly white
+    color(100 + random(-20, 10), 255, 100)    // eerie green slime
+];
+this.fillColor = random(palette);
+
+
 
 		// Rest Area
 		let sum = 0;
@@ -242,8 +246,13 @@ gatherForces_Area() {
 		push();
 		strokeWeight(PARTICLE_RADIUS);
 		stroke("DarkOrchid");
-		fill(this.fillColor);
+let alpha = this.hit ? 160 : 220;
+fill(red(this.fillColor), green(this.fillColor), blue(this.fillColor), alpha);
 		{
+			// Glowing body core
+drawingContext.shadowBlur = 40;
+drawingContext.shadowColor = color(red(this.fillColor), green(this.fillColor), blue(this.fillColor));
+
 			beginShape(TESS);
 			for (let particle of this.BP) vertex(particle.p.x, particle.p.y);
 			endShape(CLOSE);
@@ -251,18 +260,35 @@ gatherForces_Area() {
 		if (DRAW_BLOB_PARTICLES) {
 			fill("DarkOrchid");
 			if (this.hit == true) {
-				stroke("yellow")
-				fill("yellow");
-			}
+    stroke("orange");
+    fill("orangered");  // shows visual stress under contact
+}
+
+			// subtle pulse under stress
+if (this.hit) {
+    this.fillColor = color(
+        255,
+        60 + 60 * sin(frameCount * 0.2),
+        0
+    );
+}
+
 			for (let particle of this.BP) circle(particle.p.x, particle.p.y, PARTICLE_RADIUS);
 		}
 		this.drawBlobFace();
 		this.drawBound();
+		drawingContext.shadowBlur = 0;
+
 		pop();
 	}
 
 	drawBlobFace() {
 		push();
+		// Candle glow pulsation
+let flicker = 0.8 + 0.2 * sin(frameCount * 0.3 + random(0, 1));
+drawingContext.shadowBlur = 25 * flicker;
+drawingContext.shadowColor = "orange";
+
 		let com = this.centerOfMass();
 		let cov = this.centerOfVelocity();
 		let up = vec2(0, 0);
@@ -285,9 +311,13 @@ gatherForces_Area() {
 		} else {
 			lookDir.normalize().mult(this.eyeSize * 0.3);
 		}
+		// Halloween glow
+drawingContext.shadowBlur = 20;
+drawingContext.shadowColor = "rgba(255, 140, 0, 0.8)";
+
 		stroke(0);
 		strokeWeight(0.001);
-		fill(255);
+fill(255, 140, 0); // orange glow eyes
 		circle(leftEyePos.x, leftEyePos.y, this.eyeSize);
 		if (isBlinking) {
 			strokeWeight(0.002);
@@ -296,7 +326,7 @@ gatherForces_Area() {
 			fill(0);
 			circle(leftEyePos.x + lookDir.x, leftEyePos.y + lookDir.y, this.pupilSize);
 		}
-		fill(255);
+fill(255, 120 + 40 * flicker, 0);
 		circle(rightEyePos.x, rightEyePos.y, this.eyeSize);
 		if (isBlinking) {
 			strokeWeight(0.002);
@@ -305,6 +335,15 @@ gatherForces_Area() {
 			fill(0);
 			circle(rightEyePos.x + lookDir.x, rightEyePos.y + lookDir.y, this.pupilSize);
 		}
+// 🎃 spooky grin when compressed
+let mouthCenter = this.centerOfMass(); // renamed variable
+let mouthWidth = this.eyeSpacing * 2;
+let mouthHeight = this.eyeSize * 0.6;
+noFill();
+stroke(255, 100 + 60 * sin(frameCount * 0.3), 0);
+strokeWeight(0.004);
+arc(mouthCenter.x, mouthCenter.y + this.eyeSpacing * 0.8, mouthWidth, mouthHeight, 0, PI);
+
 		pop();
 	}
 
