@@ -445,6 +445,9 @@ class Blob {
 		strokeWeight(0.0015);
 		ellipse(ex, ey, 0.016 + 0.003 * sin(frameCount * 0.4 + s));
 		noStroke();
+		// 👁️‍🗨️ white reflection glint (same for all types)
+		fill(255, 255, 255, 240);
+		ellipse(ex - 0.004, ey - 0.004, 0.004, 0.004);
 
 	    // eyelid overlay
 	    fill(200,240,255,eyelidAlpha);
@@ -485,6 +488,10 @@ class Blob {
 		// inner ember flicker
 		fill(255, 160, 0, 160 + 40 * sin(frameCount * 0.2));
 		ellipse(ex, ey, 0.006 + 0.002 * sin(frameCount * 0.5 + s));
+		noStroke();
+		// 👁️‍🗨️ white reflection glint (same for all types)
+		fill(255, 255, 255, 240);
+		ellipse(ex - 0.004, ey - 0.004, 0.004, 0.004);
 
 	  }
 	
@@ -512,11 +519,11 @@ class Blob {
 	  drawingContext.shadowBlur = 55;
 	  drawingContext.shadowColor = "rgba(255,180,80,0.8)";
 	  noStroke();
-	
+
 	  // Eyes – hellfire cores
 	  for (let s of [-1,1]){
-	    let ex=c.x+s*0.018, ey=c.y-0.012;
-		fill(255,140,0,130+80*flicker); ellipse(ex,ey,0.026);
+		  let ex=c.x+s*0.018, ey=c.y-0.012;
+		  fill(255,140,0,130+80*flicker); ellipse(ex,ey,0.026);
 		
 		// infernal black core
 		fill(0, 0, 0, 255);
@@ -532,6 +539,9 @@ class Blob {
 		strokeWeight(0.0015);
 		ellipse(ex, ey, 0.016 + 0.002 * sin(frameCount * 0.6 + s));
 		noStroke();
+		// 👁️‍🗨️ white reflection glint (same for all types)
+		fill(255, 255, 255, 240);
+		ellipse(ex - 0.004, ey - 0.004, 0.004, 0.004);
 
 	  }
 	
