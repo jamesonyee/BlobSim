@@ -36,6 +36,10 @@ class Blob {
 			let p1 = this.BP[(i + 1) % this.n];
 			this.BE.push(createEdge(p0, p1));
 		}
+		// --- assign a random theme once per blob ---
+		const themes = ["ghost", "pumpkin", "skull"];
+		this.theme = random(themes);
+		
 
 		// SETUP YOUR APPEARANCE/FACIAL ELEMENTS:
 		// 👀 TODO
@@ -49,7 +53,6 @@ class Blob {
 		];
 		this.fillColor = random(palette);
 		
-
 		// Rest Area
 		let sum = 0;
 		for (let i = 0; i < this.n; i++) {
@@ -247,11 +250,11 @@ class Blob {
 	  stroke(50, 0, 80, 80);
 	
 	  // --- flicker & theme selection ---
-	  let alpha = this.hit ? 180 : 230;
-	  let flicker = 0.6 + 0.4 * sin(frameCount * 0.1 + this.blobIndex);
-	  let theme = this.theme || ["ghost","pumpkin","skull"][floor(random(3))];
-	  this.theme = theme;
-	
+		let alpha = this.hit ? 180 : 230;
+		let flicker = 0.6 + 0.4 * sin(frameCount * 0.1 + this.blobIndex);
+		let theme = this.theme; // use the theme chosen in constructor
+		
+			
 	  // --- body contour glow ---
 	  drawingContext.shadowBlur = 40;
 	  drawingContext.shadowColor =
@@ -266,37 +269,80 @@ class Blob {
 	  if (theme === "skull") fill(255, 255, 245, 90 + 40*flicker);
 	
 	  beginShape(); for (let p of this.BP) vertex(p.p.x, p.p.y); endShape(CLOSE);
-	
-	  // --- visible particles ---
-	for (let i = 0; i < this.BP.length; i++) {
-	  let p = this.BP[i];
-	
-	  // outer glow pulse
-	  let flicker = 0.5 + 0.5 * sin(frameCount * 0.3 + i);
-	
-	  // stroke + solid fill for clarity
-	  stroke(0, 0, 0, 220);
-	  strokeWeight(PARTICLE_RADIUS * 0.8);
-	
-	  if (theme === "ghost") fill(220, 255, 255, 255);
-	  if (theme === "pumpkin") fill(255, 130 + 40*flicker, 30, 255);
-	  if (theme === "skull") fill(255, 255, 245, 255);
-	
-	  // slightly smaller radius for dense “grainy bead” look
-	  circle(p.p.x, p.p.y, PARTICLE_RADIUS * 1.05);
-	
-	  // subtle glow halo behind each particle
-	  noStroke();
-	  if (theme === "ghost") fill(160, 255, 255, 40);
-	  if (theme === "pumpkin") fill(255, 100, 0, 40);
-	  if (theme === "skull") fill(255, 240, 200, 35);
-	  circle(p.p.x, p.p.y, PARTICLE_RADIUS * 2.5);
-	}
 		
-
+		// --- ✨ THEMED PARTICLE SYSTEM (distinct material per blob) ---
+		for (let i = 0; i < this.BP.length; i++) {
+		  let p = this.BP[i];
+		  let sparkle = noise(frameCount * 0.03 + i * 0.2);
+		  let flicker = 0.6 + 0.4 * sin(frameCount * 0.3 + i);
+		  let jitter = 0.0015 * sin(frameCount * 0.4 + i);
+		
+		  // 👻 GHOST — airy luminous mist beads
+		  if (theme === "ghost") {
+		    stroke(180, 255, 255, 120);
+		    strokeWeight(PARTICLE_RADIUS * 0.4);
+		    fill(220, 255, 255, 150 + 60 * sparkle);
+		    circle(p.p.x + jitter, p.p.y + jitter, PARTICLE_RADIUS * 1.4);
+		    noStroke();
+		    fill(160, 240, 255, 60);
+		    ellipse(p.p.x, p.p.y, PARTICLE_RADIUS * 2.6);
+		  }
+		
+		  // 🎃 PUMPKIN — molten fire beads with ember sparks
+		  if (theme === "pumpkin") {
+		    stroke(0, 0, 0, 240);
+		    strokeWeight(PARTICLE_RADIUS * 0.9);
+		    fill(255, 140 + 70 * sparkle, 20, 255);
+		    circle(p.p.x + jitter, p.p.y + jitter, PARTICLE_RADIUS * 1.1);
+		    noStroke();
+		    fill(255, 100, 0, 70);
+		    ellipse(p.p.x, p.p.y, PARTICLE_RADIUS * 2.8);
+		
+		    // tiny ember sparks
+		    if (random() < 0.05) {
+		      fill(255, 200, 40, 160);
+		      ellipse(p.p.x + random(-0.01, 0.01), p.p.y - random(0.02), PARTICLE_RADIUS * 0.6);
+		    }
+		  }
+		
+		  // 💀 SKULL — matte bone beads with dusty halo
+		  if (theme === "skull") {
+		    stroke(80, 60, 40, 180);
+		    strokeWeight(PARTICLE_RADIUS * 0.8);
+		    fill(255, 250, 235, 220);
+		    circle(p.p.x + jitter, p.p.y + jitter, PARTICLE_RADIUS * 1.05);
+		    noStroke();
+		    fill(255, 240, 200, 30);
+		    ellipse(p.p.x, p.p.y, PARTICLE_RADIUS * 2.4);
+		  }
+		}
 	
+		// --- 🌫️ Inner breathing glow (adds depth & motion)
+		let c = this.centerOfMass();
+		let breath = 0.6 + 0.4 * sin(frameCount * 0.05 + this.blobIndex);
+		noStroke();
+		if (theme === "ghost") fill(200, 250, 255, 60 + 40 * breath);
+		if (theme === "pumpkin") fill(255, 120, 0, 60 + 40 * breath);
+		if (theme === "skull") fill(255, 250, 230, 40 + 25 * breath);
+		ellipse(c.x, c.y, this.radius * (0.9 + 0.05 * sin(frameCount * 0.04)));
+	
+		// --- 🕸️ Floating motes (adds life around each blob)
+		blendMode(ADD);
+		for (let j = 0; j < 5; j++) {
+		  let angle = frameCount * 0.02 + j * TWO_PI / 5;
+		  let dist = this.radius * (0.85 + 0.1 * sin(frameCount * 0.05 + j));
+		  let px = c.x + dist * cos(angle);
+		  let py = c.y + dist * sin(angle);
+		
+		  if (theme === "ghost") fill(180, 255, 255, 60);
+		  if (theme === "pumpkin") fill(255, 100 + 80 * sin(frameCount * 0.3 + j), 0, 90);
+		  if (theme === "skull") fill(255, 230, 200, 50);
+		  ellipse(px, py, PARTICLE_RADIUS * 0.7);
+		}
+		blendMode(BLEND);
+	
+		
 	  // --- spectral interior (new core) ---
-	  let c = this.centerOfMass();
 	  blendMode(ADD);
 	  for (let i = 0; i < 3; i++) {
 	    if (theme === "ghost") fill(120, 200, 255, 30 + 20*i);
