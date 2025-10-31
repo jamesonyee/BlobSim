@@ -114,7 +114,8 @@ class Environment {
 		let p0 = createParticle(x, y);
 		let p1 = createParticle(x, y - r);
 		p0.pin = p1.pin = true;
-		let e01 = createEdge(p0, p1);
+let e01 = createEdge(p0, p1);
+e01.glowPhase = random(TWO_PI); // for flicker phase
 		this.envParticles.push(p0);
 		this.envParticles.push(p1);
 		this.envEdges.push(e01);
@@ -126,27 +127,51 @@ class Environment {
 	// Makes popcorn <jk> no it doesn't... 
 	draw() {
 		push();
-		image(bgImage, 0, 0, WIDTH, HEIGHT);
+push();
+// ✨ Sharper moonlit backdrop
+image(bgImage, 0, 0, WIDTH, HEIGHT);
 
-		if (detectedEdgeEdgeFailure) { // HALT ON OVERLAP + DRAW PURPLE SCREEN
-			push();
-			fill(191, 64, 191, 100);
-			noStroke();
-			rect(0, 0, WIDTH, HEIGHT);
-			pop();
-		}
+// ghostly orange overlay for warmth
+noStroke();
+fill(80, 40, 0, 45);
+rect(0, 0, WIDTH, HEIGHT);
 
-		stroke("blue");
-		strokeWeight(PARTICLE_RADIUS);
-		for (let edge of this.envEdges) {
-			edge.draw();
-		}
-		fill("blue");
+// faint rolling mist overlay (dynamic)
+let mistAlpha = 35 + 20 * sin(frameCount * 0.02);
+fill(255, 150, 80, mistAlpha);
+rect(0, 0, WIDTH, HEIGHT);
+pop();
+
+
+// 🕯️ Spikes = flickering candles
+for (let edge of this.envEdges) {
+  if (edge.length() < 0.05) {
+    let flicker = 180 + 60 * sin(frameCount * 0.2 + edge.glowPhase);
+    stroke(255, 150, 40, flicker);
+    strokeWeight(PARTICLE_RADIUS * 1.5);
+    drawingContext.shadowBlur = 20;
+    drawingContext.shadowColor = "orange";
+    line(edge.q.p.x, edge.q.p.y, edge.r.p.x, edge.r.p.y);
+  }
+}
+
+// 🌕 Pegs = cold ghostly lanterns
+for (let edge of this.envEdges) {
+  if (edge.length() >= 0.05) {
+    stroke(80, 200, 255, 100 + 50 * sin(frameCount * 0.05 + edge.glowPhase));
+    strokeWeight(PARTICLE_RADIUS * 0.8);
+    drawingContext.shadowBlur = 10;
+    drawingContext.shadowColor = "cyan";
+    edge.draw();
+  }
+}
+drawingContext.shadowBlur = 0;
+
 		noStroke();
 		for (let particle of this.envParticles) {
 			particle.draw();
 		}
-		stroke("silver"); // glinting spikes
+stroke("#00ffcc"); // ghostly glint
 		if (floor(frameCount * 0.3) % 2 == 0) {
 			for (let edge of this.envEdges) {
 				if (random() > 0.95)
@@ -157,6 +182,15 @@ class Environment {
 					}
 			}
 		}
+		drawingContext.shadowBlur = 0;
+for (let edge of this.envEdges) {
+  if (edge.length() < 0.05) { // short spikes
+    let glow = 100 + 80 * sin(frameCount * 0.1 + (edge.glowPhase || 0));
+    stroke(255, 180, 80, glow);
+    line(edge.q.p.x, edge.q.p.y, edge.r.p.x, edge.r.p.y);
+  }
+}
+
 		pop(); // wait, it does pop :/ 
 	}
 }
