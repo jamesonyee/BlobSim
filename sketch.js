@@ -322,23 +322,72 @@ for (let i = 0; i < 5; i++) {
 }
 pop();
 
-// 🎃 Floating HUD (carved pumpkin counters)
+// 🎃 Haunted HUD — ghostly carved pumpkin text
 push();
 textFont(subFont);
-textSize(24);
+textSize(26);
 textAlign(LEFT);
-let flick = 160 + 60 * sin(frameCount * 0.05);
-fill(255, flick, 0, 200);
-stroke(255, 180, 40, 150);
-strokeWeight(2);
+
+// 👻 floating fog behind the HUD
+push();
+noStroke();
+blendMode(SOFT_LIGHT);
+for (let i = 0; i < 4; i++) {
+  fill(255, 140, 30, 6 + 3 * sin(frameCount * 0.07 + i));
+  ellipse(110 + i * 10, 65 + i * 5, 180, 70);
+}
+pop();
+
+// 💀 eerie flicker colors (orange–amber glow)
+let baseGlow = 140 + 70 * sin(frameCount * 0.07);
+let emberShift = 100 + 50 * sin(frameCount * 0.15);
+if (random() < 0.003) baseGlow = 255; // rare lightning flash over HUD
+
+// carved glowing look
+fill(255, baseGlow, 0, 240);
+stroke(255, 180 + 40 * sin(frameCount * 0.1), 60, 200);
+strokeWeight(3.2);
 text(`🎃 BLOBS: ${blobs.length}`, 25, 40);
+
+// ghostly green shimmer overlay
+fill(120, 255, 180, 60 + 40 * sin(frameCount * 0.09));
+noStroke();
+text(`🎃 BLOBS: ${blobs.length}`, 25 + 1.5 * sin(frameCount * 0.05), 40 + 1.5 * cos(frameCount * 0.05));
+
+// 🕸️ edges — subtle red flicker
+fill(255, 100 + 80 * sin(frameCount * 0.08), 0, 200);
+stroke(255, 180, 50, 150);
+strokeWeight(2.5);
 text(`🕸️ EDGES: ${edges.length}`, 25, 70);
+
+// 💀 particles — eerie ghost-green decay glow
+let decayPulse = 120 + 60 * sin(frameCount * 0.09);
+fill(140, 255, 100, 220);
+stroke(90, decayPulse, 40, 180);
+strokeWeight(2.5);
 text(`💀 PARTICLES: ${particles.length}`, 25, 100);
 
-// subtle flicker light behind HUD
+// faint toxic mist shimmer
 noStroke();
-fill(255, 120, 40, 15 + 10 * sin(frameCount*0.1));
-ellipse(90, 65, 120);
+fill(180, 255, 100, 40 + 30 * sin(frameCount * 0.06));
+ellipse(140, 95, 80 + 20 * sin(frameCount * 0.05), 30);
+
+// ✨ flickering ember sparks around HUD
+blendMode(ADD);
+noStroke();
+for (let i = 0; i < 6; i++) {
+  let ex = 60 + random(-20, 60);
+  let ey = 50 + random(-10, 70);
+  fill(255, 120 + random(80), 40, random(40, 100));
+  ellipse(ex, ey, random(3, 5));
+}
+
+// 🌫️ faint mist rolling over counters
+blendMode(SOFT_LIGHT);
+for (let i = 0; i < 3; i++) {
+  fill(255, 150, 50, 10 + 5 * sin(frameCount * 0.04 + i));
+  rect(15, 25 + i * 20, 230, 15);
+}
 pop();
 
 
