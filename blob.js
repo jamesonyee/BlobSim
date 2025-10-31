@@ -430,10 +430,22 @@ class Blob {
 	    fill(255,255,255,90);
 	    ellipse(ex, ey, 0.022, 0.026);
 	    // pupil (glowing cyan orb)
-	    fill(0, 0, 0, 240);
-	    ellipse(ex, ey, 0.014 + 0.003*sin(frameCount*0.3 + s));
-	    fill(150, 255, 255, 200);
-	    ellipse(ex, ey, 0.008 + 0.002*sin(frameCount*0.4 + s));
+		// pupil (ghost — ethereal cyan glow)
+		fill(0, 0, 0, 250);
+		ellipse(ex, ey, 0.013 + 0.003 * sin(frameCount * 0.3 + s)); // black core
+		
+		// inner cyan aura
+		noStroke();
+		fill(150, 255, 255, 180);
+		ellipse(ex, ey, 0.010 + 0.002 * sin(frameCount * 0.5 + s));
+		
+		// faint outer ring
+		noFill();
+		stroke(200, 255, 255, 120);
+		strokeWeight(0.0015);
+		ellipse(ex, ey, 0.016 + 0.003 * sin(frameCount * 0.4 + s));
+		noStroke();
+
 	    // eyelid overlay
 	    fill(200,240,255,eyelidAlpha);
 	    ellipse(ex, ey - 0.002, 0.022, 0.010);
@@ -460,10 +472,20 @@ class Blob {
 	  // Eyes
 	  for (let s of [-1,1]){
 	    let ex=c.x+s*0.018, ey=c.y-0.015;
-	    fill(255,90,0,100); ellipse(ex,ey,0.022);
-	    fill(0); ellipse(ex,ey,0.018);
-	    fill(255,0,0,220);
-	    ellipse(ex+0.001*sin(frameCount*0.6+s),ey,0.006,0.012);
+		fill(255,90,0,100); ellipse(ex,ey,0.022);
+		
+		// fiery black core
+		fill(0, 0, 0, 255);
+		ellipse(ex, ey, 0.017 + 0.002 * sin(frameCount * 0.3 + s));
+		
+		// molten orange iris
+		fill(255, 60, 0, 220);
+		ellipse(ex, ey, 0.010 + 0.001 * sin(frameCount * 0.4 + s));
+		
+		// inner ember flicker
+		fill(255, 160, 0, 160 + 40 * sin(frameCount * 0.2));
+		ellipse(ex, ey, 0.006 + 0.002 * sin(frameCount * 0.5 + s));
+
 	  }
 	
 	  // Old-style jagged glowing teeth (restored)
@@ -494,10 +516,23 @@ class Blob {
 	  // Eyes – hellfire cores
 	  for (let s of [-1,1]){
 	    let ex=c.x+s*0.018, ey=c.y-0.012;
-	    fill(255,140,0,130+80*flicker); ellipse(ex,ey,0.026);
-	    fill(0); ellipse(ex,ey,0.018);
-	    fill(255,30,0,240);
-	    ellipse(ex,ey,0.007+0.003*sin(frameCount*0.5+s),0.014);
+		fill(255,140,0,130+80*flicker); ellipse(ex,ey,0.026);
+		
+		// infernal black core
+		fill(0, 0, 0, 255);
+		ellipse(ex, ey, 0.018 + 0.002 * sin(frameCount * 0.4 + s));
+		
+		// fiery inner iris
+		fill(255, 30, 0, 240);
+		ellipse(ex, ey, 0.010 + 0.002 * sin(frameCount * 0.3 + s));
+		
+		// glowing ember ring
+		noFill();
+		stroke(255, 80, 0, 180);
+		strokeWeight(0.0015);
+		ellipse(ex, ey, 0.016 + 0.002 * sin(frameCount * 0.6 + s));
+		noStroke();
+
 	  }
 	
 	  // Nose cavity
