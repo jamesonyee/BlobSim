@@ -249,8 +249,8 @@ pop();
 push();
 textAlign(CENTER);
 textFont(titleFont);
-textSize(90);
-
+textSize(width * 0.072);
+	
 // gradually fade out when blobs descend
 if (titleEvaporating && titleFade > 0) {
 titleFade -= 8.4; // faster fade (half the time)
@@ -288,7 +288,7 @@ for (let i = 0; i < title.length; i++) {
 
 // 💀 subtitle: slowly fades too
 textFont(subFont);
-textSize(28);
+textSize(26); 
 fill(255, 40, 0, titleFade * 0.8);
 noStroke();
 text("Haunted Harvest Edition", width/2, 135 + 2*sin(frameCount*0.05));
