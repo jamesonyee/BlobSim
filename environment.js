@@ -114,8 +114,8 @@ class Environment {
 		let p0 = createParticle(x, y);
 		let p1 = createParticle(x, y - r);
 		p0.pin = p1.pin = true;
-let e01 = createEdge(p0, p1);
-e01.glowPhase = random(TWO_PI); // for flicker phase
+		let e01 = createEdge(p0, p1);
+		e01.glowPhase = random(TWO_PI); // for flicker phase
 		this.envParticles.push(p0);
 		this.envParticles.push(p1);
 		this.envEdges.push(e01);
@@ -127,152 +127,151 @@ e01.glowPhase = random(TWO_PI); // for flicker phase
 	// Makes popcorn <jk> no it doesn't... 
 	draw() {
 		push();
-// 🌲 Full Halloween forest backdrop (draw first)
-// 🌲 Selectively reveal the background (bottom-right fade reveal)
-push();
+		// 🌲 Full Halloween forest backdrop (draw first)
+		push();
 
-// Draw background normally but faded by a gradient mask
-let grad = drawingContext.createRadialGradient(
-  width * 0.85, height * 0.75, width * 0.05,   // inner bright center (bottom right)
-  width * 0.85, height * 0.75, width * 0.35    // outer fade radius
-);
-grad.addColorStop(0.0, 'rgba(255,255,255,0.95)');
-grad.addColorStop(0.4, 'rgba(255,255,255,0.6)');
-grad.addColorStop(0.7, 'rgba(255,255,255,0.2)');
-grad.addColorStop(1.0, 'rgba(255,255,255,0.0)');
-drawingContext.save();
-drawingContext.globalCompositeOperation = 'source-over';
-drawingContext.fillStyle = 'black';
-drawingContext.fillRect(0, 0, width, height);
-
-// Mask the background image using the radial fade
-drawingContext.globalCompositeOperation = 'destination-out';
-drawingContext.fillStyle = grad;
-drawingContext.fillRect(0, 0, width, height);
-drawingContext.restore();
-
-// Now draw the fog image through the fade
-tint(255, 220); // mild visibility
-image(bgImage, 0, 0, WIDTH, HEIGHT);
-pop();
-
-// subtle orange fog over reveal zone
-push();
-noStroke();
-fill(255, 180, 60, 10 + 5 * sin(frameCount * 0.05));
-ellipse(width * 0.85, height * 0.75, width * 0.6);
-pop();
-
-push();
-blendMode(ADD);
-// subtle glow pulses (remove harsh bottom box)
-fill(255, 180, 80, 6 + 4 * sin(frameCount * 0.1));
-ellipse(width/2, height/2, width * 1.2);
-
-pop();
+		// Draw background normally but faded by a gradient mask
+		let grad = drawingContext.createRadialGradient(
+		  width * 0.85, height * 0.75, width * 0.05,   // inner bright center (bottom right)
+		  width * 0.85, height * 0.75, width * 0.35    // outer fade radius
+		);
+		grad.addColorStop(0.0, 'rgba(255,255,255,0.95)');
+		grad.addColorStop(0.4, 'rgba(255,255,255,0.6)');
+		grad.addColorStop(0.7, 'rgba(255,255,255,0.2)');
+		grad.addColorStop(1.0, 'rgba(255,255,255,0.0)');
+		drawingContext.save();
+		drawingContext.globalCompositeOperation = 'source-over';
+		drawingContext.fillStyle = 'black';
+		drawingContext.fillRect(0, 0, width, height);
+		
+		// Mask the background image using the radial fade
+		drawingContext.globalCompositeOperation = 'destination-out';
+		drawingContext.fillStyle = grad;
+		drawingContext.fillRect(0, 0, width, height);
+		drawingContext.restore();
+		
+		// Now draw the fog image through the fade
+		tint(255, 220); // mild visibility
+		image(bgImage, 0, 0, WIDTH, HEIGHT);
+		pop();
+		
+		// subtle orange fog over reveal zone
+		push();
+		noStroke();
+		fill(255, 180, 60, 10 + 5 * sin(frameCount * 0.05));
+		ellipse(width * 0.85, height * 0.75, width * 0.6);
+		pop();
+		
+		push();
+		blendMode(ADD);
+		// subtle glow pulses (remove harsh bottom box)
+		fill(255, 180, 80, 6 + 4 * sin(frameCount * 0.1));
+		ellipse(width/2, height/2, width * 1.2);
+		
+		pop();
 
 		
-// 🌌 Deep contrast enhancer (no fog, boosts color & brightness)
-push();
-blendMode(ADD);
-noStroke();
-
-// 🔥 warm light center for “candle” mood
-// Subtle lighting overlay (adds depth without fog)
-push();
-blendMode(ADD);
-noStroke();
-
-// Warm candle glow (localized)
-fill(255, 140, 60, 18);
-ellipse(width / 2, height * 0.65, width * 0.4);
-
-// Cool moon rim-light (faint)
-fill(100, 120, 255, 10);
-ellipse(width / 2, height * 0.25, width * 0.6);
-pop();
-
-
-pop();
+		// 🌌 Deep contrast enhancer (no fog, boosts color & brightness)
+		push();
+		blendMode(ADD);
+		noStroke();
+		
+		// 🔥 warm light center for “candle” mood
+		// Subtle lighting overlay (adds depth without fog)
+		push();
+		blendMode(ADD);
+		noStroke();
+		
+		// Warm candle glow (localized)
+		fill(255, 140, 60, 18);
+		ellipse(width / 2, height * 0.65, width * 0.4);
+		
+		// Cool moon rim-light (faint)
+		fill(100, 120, 255, 10);
+		ellipse(width / 2, height * 0.25, width * 0.6);
+		pop();
+		
+		
+		pop();
 
 		// 🌕 Cinematic Moon Glow (adds dynamic realism)
-push();
-blendMode(ADD);
-
-// Moon body
-let moonX = width * 0.75;   // adjust horizontal placement
-let moonY = height * 0.18;  // vertical placement
-let moonR = width * 0.12;
-noStroke();
-fill(255, 250, 230, 220);
-ellipse(moonX, moonY, moonR);
-
-// Soft halo glow
-for (let i = 0; i < 5; i++) {
-  fill(200, 220, 255, 40 - i * 8);
-  ellipse(moonX, moonY, moonR * (1.3 + i * 0.1));
-}
-
-// Flickering light pulse (very faint shimmer)
-fill(255, 255, 200, 5 + 5 * sin(frameCount * 0.1));
-ellipse(moonX, moonY, moonR * 1.4);
-pop();
-
-// ✅ NOW draw spikes *after* the background and fog so they show on top
-push();
-// 🕯️ tall glowing spikes (visible candle effect)
-for (let edge of this.envEdges) {
-  if (edge.length() < 0.05) {
-    let flicker = 180 + 75 * sin(frameCount * 0.3 + edge.glowPhase);
-stroke(255, 200, 100, flicker);
-strokeWeight(PARTICLE_RADIUS * 6.0);
-
-    drawingContext.shadowBlur = 30;
-drawingContext.shadowColor = frameCount % 120 < 60 ? "#ff6600" : "#00e5ff";
-    line(edge.q.p.x, edge.q.p.y, edge.r.p.x, edge.r.p.y - 0.015);
-    fill(255, 220, 150, 220);
-    noStroke();
-    ellipse(edge.r.p.x, edge.r.p.y - 0.02, 0.012 + 0.004 * sin(frameCount * 0.5));
-	  // faint candle aura
-drawingContext.shadowBlur = 60;
-drawingContext.shadowColor = "rgba(255,160,60,0.8)";
-
-  }
-}
+		push();
+		blendMode(ADD);
 		
-pop();
+		// Moon body
+		let moonX = width * 0.75;   // adjust horizontal placement
+		let moonY = height * 0.18;  // vertical placement
+		let moonR = width * 0.12;
+		noStroke();
+		fill(255, 250, 230, 220);
+		ellipse(moonX, moonY, moonR);
+		
+		// Soft halo glow
+		for (let i = 0; i < 5; i++) {
+		  fill(200, 220, 255, 40 - i * 8);
+		  ellipse(moonX, moonY, moonR * (1.3 + i * 0.1));
+		}
+		
+		
+		// Flickering light pulse (very faint shimmer)
+		fill(255, 255, 200, 5 + 5 * sin(frameCount * 0.1));
+		ellipse(moonX, moonY, moonR * 1.4);
+		pop();
+				
+		push();
+		// 🕯️ tall glowing spikes (visible candle effect)
+		for (let edge of this.envEdges) {
+		  if (edge.length() < 0.05) {
+		    let flicker = 180 + 75 * sin(frameCount * 0.3 + edge.glowPhase);
+		stroke(255, 200, 100, flicker);
+		strokeWeight(PARTICLE_RADIUS * 6.0);
+		
+		    drawingContext.shadowBlur = 30;
+		drawingContext.shadowColor = frameCount % 120 < 60 ? "#ff6600" : "#00e5ff";
+		    line(edge.q.p.x, edge.q.p.y, edge.r.p.x, edge.r.p.y - 0.015);
+		    fill(255, 220, 150, 220);
+		    noStroke();
+		    ellipse(edge.r.p.x, edge.r.p.y - 0.02, 0.012 + 0.004 * sin(frameCount * 0.5));
+			  // faint candle aura
+		drawingContext.shadowBlur = 60;
+		drawingContext.shadowColor = "rgba(255,160,60,0.8)";
+		
+		  }
+		}
+				
+		pop();
 
 
-// 👻 glowing blue-green ghost pegs (keep both effects active)
-for (let edge of this.envEdges) {
-  if (edge.length() >= 0.05 && edge.length() < 0.2) {
-    stroke(120, 255, 255, 80 + 60 * sin(frameCount * 0.07 + edge.glowPhase));
-    strokeWeight(PARTICLE_RADIUS);
-    drawingContext.shadowBlur = 20;
-    drawingContext.shadowColor = "cyan";
-    edge.draw();
-  }
-}
-drawingContext.shadowBlur = 0;
+		// 👻 glowing blue-green ghost pegs (keep both effects active)
+		for (let edge of this.envEdges) {
+		  if (edge.length() >= 0.05 && edge.length() < 0.2) {
+		    stroke(120, 255, 255, 80 + 60 * sin(frameCount * 0.07 + edge.glowPhase));
+		    strokeWeight(PARTICLE_RADIUS);
+		    drawingContext.shadowBlur = 20;
+		    drawingContext.shadowColor = "cyan";
+		    edge.draw();
+		  }
+		}
+		drawingContext.shadowBlur = 0;
 
-
-// 🌕 Pegs = cold ghostly lanterns
-for (let edge of this.envEdges) {
-  if (edge.length() >= 0.05) {
-    stroke(80, 200, 255, 100 + 50 * sin(frameCount * 0.05 + edge.glowPhase));
-    strokeWeight(PARTICLE_RADIUS * 0.8);
-    drawingContext.shadowBlur = 10;
-    drawingContext.shadowColor = "cyan";
-    edge.draw();
-  }
-}
-drawingContext.shadowBlur = 0;
+		
+		// 🌕 Pegs = cold ghostly lanterns
+		for (let edge of this.envEdges) {
+		  if (edge.length() >= 0.05) {
+		    stroke(80, 200, 255, 100 + 50 * sin(frameCount * 0.05 + edge.glowPhase));
+		    strokeWeight(PARTICLE_RADIUS * 0.8);
+		    drawingContext.shadowBlur = 10;
+		    drawingContext.shadowColor = "cyan";
+		    edge.draw();
+		  }
+		}
+		drawingContext.shadowBlur = 0;
 
 		noStroke();
 		for (let particle of this.envParticles) {
 			particle.draw();
 		}
-stroke("#00ffcc"); // ghostly glint
+		stroke("#00ffcc"); // ghostly glint
 		if (floor(frameCount * 0.3) % 2 == 0) {
 			for (let edge of this.envEdges) {
 				if (random() > 0.95)
@@ -284,13 +283,13 @@ stroke("#00ffcc"); // ghostly glint
 			}
 		}
 		drawingContext.shadowBlur = 0;
-for (let edge of this.envEdges) {
-  if (edge.length() < 0.05) { // short spikes
-    let glow = 100 + 80 * sin(frameCount * 0.1 + (edge.glowPhase || 0));
-    stroke(255, 180, 80, glow);
-    line(edge.q.p.x, edge.q.p.y, edge.r.p.x, edge.r.p.y);
-  }
-}
+		for (let edge of this.envEdges) {
+		  if (edge.length() < 0.05) { // short spikes
+		    let glow = 100 + 80 * sin(frameCount * 0.1 + (edge.glowPhase || 0));
+		    stroke(255, 180, 80, glow);
+		    line(edge.q.p.x, edge.q.p.y, edge.r.p.x, edge.r.p.y);
+		  }
+		}
 
 		pop(); // wait, it does pop :/ 
 	}
