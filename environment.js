@@ -127,33 +127,51 @@ e01.glowPhase = random(TWO_PI); // for flicker phase
 	// Makes popcorn <jk> no it doesn't... 
 	draw() {
 		push();
+// 🌲 Full Halloween forest backdrop (draw first)
 push();
-// ✨ Sharper moonlit backdrop
 image(bgImage, 0, 0, WIDTH, HEIGHT);
+pop();
 
-// ghostly orange overlay for warmth
+// 🌫️ Slight warm fog and vignette (adds depth)
+push();
 noStroke();
-fill(80, 40, 0, 45);
+fill(255, 120, 40, 20);
 rect(0, 0, WIDTH, HEIGHT);
+fill(30, 0, 0, 70);
+ellipse(WIDTH/2, HEIGHT/2, WIDTH*1.3);
+pop();
 
-// faint rolling mist overlay (dynamic)
-let mistAlpha = 35 + 20 * sin(frameCount * 0.02);
-fill(255, 150, 80, mistAlpha);
-rect(0, 0, WIDTH, HEIGHT);
+// ✅ NOW draw spikes *after* the background and fog so they show on top
+push();
+// 🕯️ tall glowing spikes (visible candle effect)
+for (let edge of this.envEdges) {
+  if (edge.length() < 0.05) {
+    let flicker = 180 + 75 * sin(frameCount * 0.3 + edge.glowPhase);
+    stroke(255, 180, 80, flicker);
+    strokeWeight(PARTICLE_RADIUS * 4.0);
+    drawingContext.shadowBlur = 30;
+    drawingContext.shadowColor = "orange";
+    line(edge.q.p.x, edge.q.p.y, edge.r.p.x, edge.r.p.y - 0.015);
+    fill(255, 220, 150, 220);
+    noStroke();
+    ellipse(edge.r.p.x, edge.r.p.y - 0.02, 0.012 + 0.004 * sin(frameCount * 0.5));
+  }
+}
 pop();
 
 
-// 🕯️ Spikes = flickering candles
+// 👻 glowing blue-green ghost pegs (keep both effects active)
 for (let edge of this.envEdges) {
-  if (edge.length() < 0.05) {
-    let flicker = 180 + 60 * sin(frameCount * 0.2 + edge.glowPhase);
-    stroke(255, 150, 40, flicker);
-    strokeWeight(PARTICLE_RADIUS * 1.5);
+  if (edge.length() >= 0.05 && edge.length() < 0.2) {
+    stroke(120, 255, 255, 80 + 60 * sin(frameCount * 0.07 + edge.glowPhase));
+    strokeWeight(PARTICLE_RADIUS);
     drawingContext.shadowBlur = 20;
-    drawingContext.shadowColor = "orange";
-    line(edge.q.p.x, edge.q.p.y, edge.r.p.x, edge.r.p.y);
+    drawingContext.shadowColor = "cyan";
+    edge.draw();
   }
 }
+drawingContext.shadowBlur = 0;
+
 
 // 🌕 Pegs = cold ghostly lanterns
 for (let edge of this.envEdges) {
