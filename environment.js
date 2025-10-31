@@ -164,6 +164,29 @@ pop();
 
 pop();
 
+		// 🌕 Cinematic Moon Glow (adds dynamic realism)
+push();
+blendMode(ADD);
+
+// Moon body
+let moonX = width * 0.75;   // adjust horizontal placement
+let moonY = height * 0.18;  // vertical placement
+let moonR = width * 0.12;
+noStroke();
+fill(255, 250, 230, 220);
+ellipse(moonX, moonY, moonR);
+
+// Soft halo glow
+for (let i = 0; i < 5; i++) {
+  fill(200, 220, 255, 40 - i * 8);
+  ellipse(moonX, moonY, moonR * (1.3 + i * 0.1));
+}
+
+// Flickering light pulse (very faint shimmer)
+fill(255, 255, 200, 5 + 5 * sin(frameCount * 0.1));
+ellipse(moonX, moonY, moonR * 1.4);
+pop();
+
 // ✅ NOW draw spikes *after* the background and fog so they show on top
 push();
 // 🕯️ tall glowing spikes (visible candle effect)
