@@ -186,6 +186,7 @@ for (let b of window.bats){
 }
 pop();
 
+			
 			// 🎃 Local glow around each blob (reactive pumpkin light)
 push();
 blendMode(ADD);
@@ -324,17 +325,14 @@ textFont(subFont);
 textSize(26);
 textAlign(LEFT);
 
-// 👻 floating fog behind the HUD (completely transparent to prevent white circles)
+
+// 🎃 Subtle pumpkin backlight behind HUD (no fog, no white circles)
 push();
 noStroke();
-blendMode(SOFT_LIGHT);
-for (let i = 0; i < 4; i++) {
-  // completely invisible background layer to disable HUD glow
-  fill(255, 140, 30, 0);
-  ellipse(110 + i * 10, 65 + i * 5, 80, 30);
-}
+blendMode(BLEND); // use normal blending to avoid additive haze
+fill(255, 120, 40, 6); // very low opacity warm orange
+rect(15, 25, 250, 90, 20); // gentle soft rectangle behind text
 pop();
-
 
 // 💀 eerie flicker colors (orange–amber glow)
 let baseGlow = 140 + 70 * sin(frameCount * 0.07);
@@ -367,53 +365,15 @@ text(`💀 PARTICLES: ${particles.length}`, 25, 100);
 // 🕯️👻🦇 HALLOWEEN HUD EFFECTS — stacked visual layers
 push();
 
-// 🔒 restrict visuals to the HUD area only (no white circles bleeding out)
+// 🔒 Restrict only HUD background effects — not full visuals
 drawingContext.save();
 drawingContext.beginPath();
-drawingContext.rect(0, 0, 300, 130); // clip region for top-left HUD
+drawingContext.rect(0, 0, 300, 130);
 drawingContext.clip();
 
+// keep just the candle flames near stats INSIDE HUD
 blendMode(ADD);
 noStroke();
-
-// === 1️⃣ Floating Ghost Sprites ===
-if (!window.hudGhosts) {
-  window.hudGhosts = Array.from({length:3},()=>({
-    x: random(40,180),
-    y: random(30,110),
-    drift: random(0.002,0.004),
-    phase: random(TWO_PI)
-  }));
-}
-for (let g of window.hudGhosts) {
-  g.x += 0.15*sin(frameCount*g.drift);
-  g.y += 0.1*cos(frameCount*g.drift + g.phase);
-  fill(255,255,255,50 + 40*sin(frameCount*0.03 + g.phase));
-  ellipse(g.x, g.y, 18 + 4*sin(frameCount*0.05 + g.phase), 14);
-  fill(0,0,0,80);
-  ellipse(g.x-4, g.y-1, 3,3);
-  ellipse(g.x+4, g.y-1, 3,3);
-}
-
-// === 2️⃣ Tiny Flying Bats ===
-if (!window.hudBats) {
-  window.hudBats = Array.from({length:5},()=>({
-    x: random(15,220),
-    y: random(20,120),
-    speed: random(0.8,1.3),
-    flap: random(TWO_PI)
-  }));
-}
-fill(0,0,0,150);
-for (let b of window.hudBats){
-  b.x += 0.3*b.speed;
-  if(b.x>230){ b.x=10; b.y=random(30,120); }
-  b.flap += 0.4*b.speed;
-  let wing = 6 + 2*sin(b.flap);
-  triangle(b.x, b.y, b.x+wing, b.y+2, b.x-wing, b.y+2);
-}
-
-// === 3️⃣ Dripping Candle Flames next to stats ===
 for (let i=0;i<3;i++){
   let cx = 250;
   let cy = 38 + i*30;
@@ -428,38 +388,77 @@ for (let i=0;i<3;i++){
     ellipse(cx, dropY, 2,4);
   }
 }
+drawingContext.restore(); // close the clip
 
-// === 4️⃣ Floating Eyeballs Watching Player ===
-if (!window.hudEyes) {
-  window.hudEyes = Array.from({length:2},()=>({
-    baseX: random(70,150),
-    baseY: random(40,90),
-    r: 10
+// 🌍 Now draw global spooky elements BELOW HUD (visible everywhere)
+
+// === 1️⃣ Floating Ghost Sprites ===
+if (!window.hudGhosts) {
+  window.hudGhosts = Array.from({length:5},()=>({
+    x: random(width),
+    y: random(height * 0.7, height * 0.95),
+    drift: random(0.0015,0.003),
+    phase: random(TWO_PI)
   }));
 }
-for (let e of window.hudEyes){
-  let lookX = map(mouseX,0,width,-2,2);
-  let lookY = map(mouseY,0,height,-1,1);
-  fill(255,255,240,200);
-  ellipse(e.baseX, e.baseY, e.r*2);
-  fill(100,0,0,220);
-  ellipse(e.baseX+lookX, e.baseY+lookY, e.r*0.8);
-  fill(0);
-  ellipse(e.baseX+lookX*1.2, e.baseY+lookY*1.2, e.r*0.4);
+for (let g of window.hudGhosts) {
+  g.x += 0.15*sin(frameCount*g.drift);
+  g.y += 0.1*cos(frameCount*g.drift + g.phase);
+  fill(255,255,255,30 + 20*sin(frameCount*0.03 + g.phase));
+  ellipse(g.x, g.y, 20 + 6*sin(frameCount*0.05 + g.phase), 16);
+  fill(0,0,0,50);
+  ellipse(g.x-4, g.y-1, 3,3);
+  ellipse(g.x+4, g.y-1, 3,3);
 }
 
-// === 5️⃣ Pumpkin Sparks Burst ===
-for (let i=0; i<4; i++){
-  let px = 60 + random(-20,200);
-  let py = 40 + random(-10,90);
-  fill(255, 140 + random(60), 30, 100);
+// === 2️⃣ Tiny Flying Bats ===
+if (!window.hudBats) {
+  window.hudBats = Array.from({length:8},()=>({
+    x: random(width),
+    y: random(height * 0.3, height * 0.8),
+    speed: random(0.6,1.2),
+    flap: random(TWO_PI)
+  }));
+}
+fill(0,0,0,180);
+for (let b of window.hudBats){
+  b.x += 0.4*b.speed;
+  if(b.x>width){ b.x=0; b.y=random(height*0.3, height*0.8); }
+  b.flap += 0.3*b.speed;
+  let wing = 6 + 2*sin(b.flap);
+  triangle(b.x, b.y, b.x+wing, b.y+2, b.x-wing, b.y+2);
+}
+
+// === 3️⃣ Jack-o'-Lantern Souls ===
+if (!window.hudSouls) {
+  window.hudSouls = Array.from({length:6},()=>({
+    x: random(width),
+    y: random(height * 0.5, height),
+    drift: random(0.002, 0.004),
+    phase: random(TWO_PI)
+  }));
+}
+
+noStroke();
+for (let s of window.hudSouls) {
+  s.y -= 0.2 + 0.1*sin(frameCount * s.drift);
+  if (s.y < -10) { s.y = height; s.x = random(width); }
+
+  fill(255, 120, 30, 40);
+  ellipse(s.x, s.y, 18);
+  fill(255, 180, 60, 120);
+  ellipse(s.x, s.y, 8 + 2*sin(frameCount * 0.08 + s.phase));
+}
+
+
+// === 4️⃣ Pumpkin Sparks Burst ===
+for (let i=0; i<5; i++){
+  let px = random(width);
+  let py = random(height * 0.6, height);
+  fill(255, 140 + random(60), 30, 90);
   ellipse(px, py, random(2,4));
 }
-
-// 🧹 cleanup: stop bleed outside HUD
-drawingContext.restore();
 pop();
-
 
 
 	// --- global damping once per frame ---
