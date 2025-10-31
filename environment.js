@@ -129,16 +129,39 @@ e01.glowPhase = random(TWO_PI); // for flicker phase
 		push();
 // 🌲 Full Halloween forest backdrop (draw first)
 push();
+tint(255, 255 * 1.25); // boost brightness
 image(bgImage, 0, 0, WIDTH, HEIGHT);
+tint(255, 200, 160); // slightly brighter
 pop();
 
-// 🌫️ Slight warm fog and vignette (adds depth)
 push();
+blendMode(ADD);
+fill(255, 140, 60, 10);
+rect(0, 0, width, height);
+pop();
+
+		
+// 🌌 Deep contrast enhancer (no fog, boosts color & brightness)
+push();
+blendMode(ADD);
 noStroke();
-fill(255, 120, 40, 20);
-rect(0, 0, WIDTH, HEIGHT);
-fill(30, 0, 0, 70);
-ellipse(WIDTH/2, HEIGHT/2, WIDTH*1.3);
+
+// 🔥 warm light center for “candle” mood
+// Subtle lighting overlay (adds depth without fog)
+push();
+blendMode(ADD);
+noStroke();
+
+// Warm candle glow (localized)
+fill(255, 140, 60, 18);
+ellipse(width / 2, height * 0.65, width * 0.4);
+
+// Cool moon rim-light (faint)
+fill(100, 120, 255, 10);
+ellipse(width / 2, height * 0.25, width * 0.6);
+pop();
+
+
 pop();
 
 // ✅ NOW draw spikes *after* the background and fog so they show on top
@@ -147,16 +170,22 @@ push();
 for (let edge of this.envEdges) {
   if (edge.length() < 0.05) {
     let flicker = 180 + 75 * sin(frameCount * 0.3 + edge.glowPhase);
-    stroke(255, 180, 80, flicker);
-    strokeWeight(PARTICLE_RADIUS * 4.0);
+stroke(255, 200, 100, flicker);
+strokeWeight(PARTICLE_RADIUS * 6.0);
+
     drawingContext.shadowBlur = 30;
-    drawingContext.shadowColor = "orange";
+drawingContext.shadowColor = frameCount % 120 < 60 ? "#ff6600" : "#00e5ff";
     line(edge.q.p.x, edge.q.p.y, edge.r.p.x, edge.r.p.y - 0.015);
     fill(255, 220, 150, 220);
     noStroke();
     ellipse(edge.r.p.x, edge.r.p.y - 0.02, 0.012 + 0.004 * sin(frameCount * 0.5));
+	  // faint candle aura
+drawingContext.shadowBlur = 60;
+drawingContext.shadowColor = "rgba(255,160,60,0.8)";
+
   }
 }
+		
 pop();
 
 
