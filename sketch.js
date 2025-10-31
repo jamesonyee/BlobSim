@@ -79,12 +79,15 @@ let detectedEdgeEdgeFailure = false;
 let bgImage;
 
 let titleFont;
+let subFont; // 👻 new HUD / subtitle font (Nosifer)
 
 
 function preload() {
   bgImage = loadImage('night_forest_pumpkin.png');
-  titleFont = loadFont('creepster.ttf'); // 🎃 spooky display font
+  titleFont = loadFont('creepster.ttf'); // 🎃 spooky title font
+  subFont = loadFont('nosifer.ttf'); // 💀 dripping-blood HUD font
 }
+
 
 // apply image filters *after* it’s loaded (not inside preload)
 function setup() {
@@ -244,37 +247,57 @@ pop();
 push();
 textAlign(CENTER);
 textFont(titleFont);
-textSize(70);
+textSize(80);
+
+// flickering neon orange gradient glow
+for (let i = 0; i < 3; i++) {
+  let alpha = 120 - i * 30;
+  fill(255, 120 + 40 * i, 0, alpha);
+  text("ATTACK OF THE BLOBS", width/2, 85 - i * 2);
+}
+
+// 3D parallax shimmer per letter
 let title = "ATTACK OF THE BLOBS";
 for (let i = 0; i < title.length; i++) {
   let ch = title[i];
   let x = width/2 - textWidth(title)/2 + textWidth(title.substring(0, i));
-  let y = 80 + 6 * sin(frameCount*0.05 + i*0.6);
-  let alpha = 180 + 75 * sin(frameCount*0.04 + i);
-  fill(255, alpha, 0);
-  stroke(255,180,40,120);
-  strokeWeight(2);
+  let y = 85 + 5 * sin(frameCount*0.06 + i*0.8);
+  let flicker = 200 + 55 * sin(frameCount * 0.05 + i);
+  fill(255, 160, 30, flicker);
+  stroke(255, 200, 80, 160);
+  strokeWeight(3);
   text(ch, x, y);
 }
-textSize(26);
-fill(255, 210, 180, 200);
+
+// 🎃 subtitle: smoky fade
+textSize(28);
+let subAlpha = 180 + 75 * sin(frameCount * 0.02);
+fill(255, 220, 180, subAlpha);
 noStroke();
-text("Haunted Harvest Edition", width/2, 120 + 4*sin(frameCount*0.03));
+text("Haunted Harvest Edition", width/2, 130 + 3*sin(frameCount*0.04));
 pop();
+
 
 
 	pop();
 
-// 👻 Themed HUD overlay
+// 🎃 Floating HUD (carved pumpkin counters)
 push();
-textFont(titleFont);
-textSize(20);
-fill(255, 150 + 50 * sin(frameCount * 0.05), 0, 180);
-noStroke();
+textFont(subFont);
+textSize(24);
 textAlign(LEFT);
-text(`#BLOBS: ${blobs.length}`, 20, 30);
-text(`#EDGES: ${edges.length}`, 20, 55);
-text(`#PARTICLES: ${particles.length}`, 20, 80);
+let flick = 160 + 60 * sin(frameCount * 0.05);
+fill(255, flick, 0, 200);
+stroke(255, 180, 40, 150);
+strokeWeight(2);
+text(`🎃 BLOBS: ${blobs.length}`, 25, 40);
+text(`🕸️ EDGES: ${edges.length}`, 25, 70);
+text(`💀 PARTICLES: ${particles.length}`, 25, 100);
+
+// subtle flicker light behind HUD
+noStroke();
+fill(255, 120, 40, 15 + 10 * sin(frameCount*0.1));
+ellipse(90, 65, 120);
 pop();
 
 
