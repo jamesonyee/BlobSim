@@ -267,14 +267,33 @@ class Blob {
 	
 	  beginShape(); for (let p of this.BP) vertex(p.p.x, p.p.y); endShape(CLOSE);
 	
-	  // --- visible particles (integrated) ---
-	  for (let p of this.BP) {
-	    noStroke();
-	    if (theme === "ghost") fill(160, 255, 255, 70 + 40*sin(frameCount*0.3));
-	    if (theme === "pumpkin") fill(255, 120, 0, 90 + 40*sin(frameCount*0.3));
-	    if (theme === "skull") fill(255, 255, 255, 80 + 40*sin(frameCount*0.3));
-	    circle(p.p.x, p.p.y, PARTICLE_RADIUS * 1.6);
-	  }
+	  // --- visible particles ---
+	for (let i = 0; i < this.BP.length; i++) {
+	  let p = this.BP[i];
+	
+	  // outer glow pulse
+	  let flicker = 0.5 + 0.5 * sin(frameCount * 0.3 + i);
+	
+	  // stroke + solid fill for clarity
+	  stroke(0, 0, 0, 220);
+	  strokeWeight(PARTICLE_RADIUS * 0.8);
+	
+	  if (theme === "ghost") fill(220, 255, 255, 255);
+	  if (theme === "pumpkin") fill(255, 130 + 40*flicker, 30, 255);
+	  if (theme === "skull") fill(255, 255, 245, 255);
+	
+	  // slightly smaller radius for dense “grainy bead” look
+	  circle(p.p.x, p.p.y, PARTICLE_RADIUS * 1.05);
+	
+	  // subtle glow halo behind each particle
+	  noStroke();
+	  if (theme === "ghost") fill(160, 255, 255, 40);
+	  if (theme === "pumpkin") fill(255, 100, 0, 40);
+	  if (theme === "skull") fill(255, 240, 200, 35);
+	  circle(p.p.x, p.p.y, PARTICLE_RADIUS * 2.5);
+	}
+		
+
 	
 	  // --- spectral interior (new core) ---
 	  let c = this.centerOfMass();
