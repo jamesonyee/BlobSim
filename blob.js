@@ -313,14 +313,21 @@ class Blob {
 	  drawingContext.shadowColor = "rgba(160,255,255,0.9)";
 	  noStroke();
 	
-	  // Eyes
-	  for (let s of [-1,1]){
-	    let ex=c.x+s*0.018, ey=c.y-0.012;
-	    fill(255,255,255,40); ellipse(ex,ey,0.03);
-	    fill(0,0,0,250); ellipse(ex,ey,0.02);
-	    fill(0,200,255,200); ellipse(ex,ey,0.009+0.002*sin(frameCount*0.3+s));
-	  }
-	
+		// hollow eyes
+		fill(0, 0, 0, 220);
+		ellipse(c.x - 0.015, c.y - 0.01, 0.018, 0.024);
+		ellipse(c.x + 0.015, c.y - 0.01, 0.018, 0.024);
+		
+		// faint cyan glow around eyes
+		drawingContext.shadowBlur = 25;
+		drawingContext.shadowColor = "rgba(180,255,255,0.8)";
+		noFill();
+		stroke(180, 255, 255, 80);
+		strokeWeight(0.003);
+		ellipse(c.x - 0.015, c.y - 0.01, 0.025);
+		ellipse(c.x + 0.015, c.y - 0.01, 0.025);
+		
+		
 	  // Wailing mouth with ghostly teeth glow
 	  fill(0,0,0,230); ellipse(c.x,c.y+0.018,0.034,0.018);
 	  stroke(180,255,255,120); strokeWeight(0.0015);
