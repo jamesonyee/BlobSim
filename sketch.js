@@ -311,76 +311,77 @@ for (let i = 0; i < 5; i++) {
 }
 pop();
 
-// 🎃 Haunted HUD — ghostly carved pumpkin text
+// 🎃 Haunted HUD — ghostly carved pumpkin text (proper offset)
 push();
 textFont(subFont);
 textSize(26);
 textAlign(LEFT);
 
+let hudOffsetY = 12;  // 🔥 change this number to move HUD up/down
 
-// 🎃 Subtle pumpkin backlight behind HUD (no fog, no white circles)
+// 🎃 pumpkin backlight rectangle
 push();
 noStroke();
-blendMode(BLEND); // use normal blending to avoid additive haze
-fill(255, 120, 40, 6); // very low opacity warm orange
-rect(15, 25, 250, 90, 20); // gentle soft rectangle behind text
+blendMode(BLEND);
+fill(255, 120, 40, 6);
+rect(15, 25 + hudOffsetY, 250, 90, 20);
 pop();
 
-// 💀 eerie flicker colors (orange–amber glow)
+// 💀 eerie flicker colors
 let baseGlow = 140 + 70 * sin(frameCount * 0.07);
 let emberShift = 100 + 50 * sin(frameCount * 0.15);
-if (random() < 0.003) baseGlow = 255; // rare lightning flash over HUD
+if (random() < 0.003) baseGlow = 255;
 
-// carved glowing look
+// === BLOBS ===
 fill(255, baseGlow, 0, 240);
 stroke(255, 180 + 40 * sin(frameCount * 0.1), 60, 200);
 strokeWeight(3.2);
-text(`🎃 BLOBS: ${blobs.length}`, 25, 40);
+text(`🎃 BLOBS: ${blobs.length}`, 25, 40 + hudOffsetY);
 
-// ghostly green shimmer overlay
 fill(120, 255, 180, 60 + 40 * sin(frameCount * 0.09));
 noStroke();
-text(`🎃 BLOBS: ${blobs.length}`, 25 + 1.5 * sin(frameCount * 0.05), 40 + 1.5 * cos(frameCount * 0.05));
+text(`🎃 BLOBS: ${blobs.length}`,
+     25 + 1.5 * sin(frameCount * 0.05),
+     40 + hudOffsetY + 1.5 * cos(frameCount * 0.05));
 
-// 🕸️ edges — subtle red flicker
+// === EDGES ===
 fill(255, 100 + 80 * sin(frameCount * 0.08), 0, 200);
 stroke(255, 180, 50, 150);
 strokeWeight(2.5);
-text(`🕸️ EDGES: ${edges.length}`, 25, 70);
+text(`🕸️ EDGES: ${edges.length}`, 25, 70 + hudOffsetY);
 
-// 💀 particles — eerie ghost-green decay glow
+// === PARTICLES ===
 let decayPulse = 120 + 60 * sin(frameCount * 0.09);
 fill(140, 255, 100, 220);
 stroke(90, decayPulse, 40, 180);
 strokeWeight(2.5);
-text(`💀 PARTICLES: ${particles.length}`, 25, 100);
-// 🕯️👻🦇 HALLOWEEN HUD EFFECTS — stacked visual layers
-push();
+text(`💀 PARTICLES: ${particles.length}`, 25, 100 + hudOffsetY);
 
-// 🔒 Restrict only HUD background effects — not full visuals
+// === Candle flames (now also offset) ===
+push();
 drawingContext.save();
 drawingContext.beginPath();
-drawingContext.rect(0, 0, 300, 130);
+drawingContext.rect(0, hudOffsetY, 300, 130);
 drawingContext.clip();
 
-// keep just the candle flames near stats INSIDE HUD
 blendMode(ADD);
 noStroke();
-for (let i=0;i<3;i++){
+for (let i = 0; i < 3; i++) {
   let cx = 250;
-  let cy = 38 + i*30;
-  let flicker = 150 + 80*sin(frameCount*0.2 + i);
+  let cy = hudOffsetY + 38 + i * 30;
+  let flicker = 150 + 80 * sin(frameCount * 0.2 + i);
   fill(255, 180, 60, flicker);
-  ellipse(cx, cy, 5 + 1*sin(frameCount*0.4 + i));
+  ellipse(cx, cy, 5 + sin(frameCount * 0.4 + i));
   fill(255, 100, 20, 180);
-  rect(cx-1, cy, 2, 10, 1);
-  if (random()<0.01){
+  rect(cx - 1, cy, 2, 10, 1);
+  if (random() < 0.01) {
     let dropY = cy + 10 + random(10);
-    fill(255,150,40,180);
-    ellipse(cx, dropY, 2,4);
+    fill(255, 150, 40, 180);
+    ellipse(cx, dropY, 2, 4);
   }
 }
-drawingContext.restore(); // close the clip
+drawingContext.restore();
+pop();
 
 
 // === 1️⃣ Floating Ghost Sprites ===
@@ -467,10 +468,9 @@ for (let e of window.embers){
   fill(255,140+random(60),30,150);
   ellipse(e.x,e.y,2*e.s);
 }
-	// 🌌 Ambient Candlelight Breathing Effect
+	
+// 🌌 Ambient Candlelight Breathing Effect
 push();
-blendMode(ADD);
-noStroke();
 let pulse = 40 + 20 * sin(frameCount * 0.04);
 fill(255, 120, 40, 8 + 4 * sin(frameCount * 0.03));
 ellipse(width / 2, height / 2, width * (1.1 + 0.02 * sin(frameCount * 0.04)));
@@ -478,9 +478,48 @@ fill(255, 180, 100, 6);
 ellipse(width / 2, height / 2, width * 1.4);
 pop();
 
-	
+// 🕸️ Spectral Spiderweb Overlay — vibrant + glowing
+push();
+blendMode(ADD); // light-additive for glow
+noFill();
+
+strokeWeight(1.5);
+
+// core glow ring color
+let webColor = color(
+  255 * abs(sin(frameCount * 0.02 + 1.5)),
+  100 + 100 * abs(sin(frameCount * 0.015)),
+  255 * abs(sin(frameCount * 0.018)),
+  150
+);
+stroke(webColor);
+drawingContext.shadowBlur = 25;
+drawingContext.shadowColor = "rgba(255,120,240,0.9)";
+
+for (let corner of [[0,0],[width,0],[width,height],[0,height]]) {
+  let [cx, cy] = corner;
+  // radiating silk threads
+  for (let i = 0; i < 6; i++) {
+    let angle = (PI/3) * i;
+    let r = width * 0.07; // bigger for visibility
+    line(cx, cy, cx + r*cos(angle), cy + r*sin(angle));
+  }
+  // concentric rings with shimmer
+  for (let j = 20; j <= 80; j += 10) {
+    beginShape();
+    for (let i = 0; i <= 6; i++) {
+      let angle = (PI/3)*i;
+      let flicker = 2 * sin(frameCount*0.1 + j*0.05);
+      vertex(cx + (j+flicker)*cos(angle), cy + (j+flicker)*sin(angle));
+    }
+    endShape();
+  }
+}
+drawingContext.shadowBlur = 0;
 pop();
 
+
+pop(); 
 }
 
 function keyPressed() {
