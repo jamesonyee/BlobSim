@@ -413,46 +413,41 @@ class Blob {
 	  pop();
 	}
 
-	
-	// 👻 GHOST FACE — hollow eyes + eerie light mouth
 	drawGhostFace(c, flicker){
-		push();
-		if (this.hit) {
-		  drawingContext.shadowColor = "rgba(255,255,255,1)";
-		  drawingContext.shadowBlur = 80;
-		}
-		
-		drawingContext.shadowBlur = 50;
-		drawingContext.shadowColor = "rgba(160,255,255,0.9)";
-		noStroke();
+	  push();
+	  drawingContext.shadowBlur = 50;
+	  drawingContext.shadowColor = "rgba(180,255,255,0.8)";
+	  noStroke();
 	
-		// 👁 Animated hollow eyes (haunting version)
-		let look = 0.002 * sin(frameCount * 0.5); // subtle eye movement
-		let pulse = 0.002 * sin(frameCount * 0.3); // breathing size change
-		let glowPulse = 60 + 40 * sin(frameCount * 0.4); // glow intensity
-			
-		// moving hollow eyes
-		fill(0, 0, 0, 220);
-		ellipse(c.x - 0.015 + look, c.y - 0.01, 0.018 + pulse, 0.024 + pulse);
-		ellipse(c.x + 0.015 + look, c.y - 0.01, 0.018 + pulse, 0.024 + pulse);
-		
-		// flickering cyan glow
-		drawingContext.shadowBlur = 25 + 10 * sin(frameCount * 0.2);
-		drawingContext.shadowColor = `rgba(180,255,255,${0.5 + 0.3 * sin(frameCount * 0.3)})`;
-		noFill();
-		stroke(180, 255, 255, glowPulse);
-		strokeWeight(0.003 + 0.001 * sin(frameCount * 0.4));
-		ellipse(c.x - 0.015 + look, c.y - 0.01, 0.025 + pulse);
-		ellipse(c.x + 0.015 + look, c.y - 0.01, 0.025 + pulse);
-
-		// Wailing mouth with ghostly teeth glow
-	   fill(0,0,0,230); ellipse(c.x,c.y+0.018,0.034,0.018);
-	   stroke(180,255,255,120); strokeWeight(0.0015);
-	   for(let i=-3;i<=3;i++){
-		   let x=c.x+i*0.004, y=c.y+0.018;
-		   line(x,y,x,y+0.004*sin(frameCount*0.5+i));
-	   }
-		pop();
+	  // Eyelid motion (soft fade)
+	  let blink = 0.5 + 0.5 * sin(frameCount * 0.05);
+	  let eyelidAlpha = 80 * (1 - blink);
+	
+	  // Eye sockets
+	  for (let s of [-1, 1]) {
+	    let ex = c.x + s * 0.018;
+	    let ey = c.y - 0.012;
+	    fill(255,255,255,90);
+	    ellipse(ex, ey, 0.022, 0.026);
+	    // pupil (glowing cyan orb)
+	    fill(0, 0, 0, 240);
+	    ellipse(ex, ey, 0.014 + 0.003*sin(frameCount*0.3 + s));
+	    fill(150, 255, 255, 200);
+	    ellipse(ex, ey, 0.008 + 0.002*sin(frameCount*0.4 + s));
+	    // eyelid overlay
+	    fill(200,240,255,eyelidAlpha);
+	    ellipse(ex, ey - 0.002, 0.022, 0.010);
+	  }
+	
+	 
+			// Wailing mouth with ghostly teeth glow
+		   fill(0,0,0,230); ellipse(c.x,c.y+0.018,0.034,0.018);
+		   stroke(180,255,255,120); strokeWeight(0.0015);
+		   for(let i=-3;i<=3;i++){
+			   let x=c.x+i*0.004, y=c.y+0.018;
+			   line(x,y,x,y+0.004*sin(frameCount*0.5+i));
+		   }
+	  pop();
 	}
 
 	// 🎃 PUMPKIN FACE — infernal eyes + sawtooth grin
