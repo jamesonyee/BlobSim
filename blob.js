@@ -240,164 +240,164 @@ class Blob {
 			}
 		}
 	}
-
-draw() {
-  push();
-  strokeWeight(PARTICLE_RADIUS);
-  stroke(50, 0, 80, 80);
-
-  // --- flicker & theme selection ---
-  let alpha = this.hit ? 180 : 230;
-  let flicker = 0.6 + 0.4 * sin(frameCount * 0.1 + this.blobIndex);
-  let theme = this.theme || ["ghost","pumpkin","skull"][floor(random(3))];
-  this.theme = theme;
-
-  // --- body contour glow ---
-  drawingContext.shadowBlur = 40;
-  drawingContext.shadowColor =
-    theme === "ghost" ? "rgba(170,240,255,0.9)" :
-    theme === "pumpkin" ? "rgba(255,100,0,0.9)" :
-    "rgba(255,240,180,0.8)";
-  noStroke();
-
-  // --- dynamic fill flicker ---
-  if (theme === "ghost") fill(210, 250, 255, 80 + 50*flicker);
-  if (theme === "pumpkin") fill(255, 120 + 40*sin(frameCount*0.2), 0, 100 + 50*flicker);
-  if (theme === "skull") fill(255, 255, 245, 90 + 40*flicker);
-
-  beginShape(); for (let p of this.BP) vertex(p.p.x, p.p.y); endShape(CLOSE);
-
-  // --- visible particles (integrated) ---
-  for (let p of this.BP) {
-    noStroke();
-    if (theme === "ghost") fill(160, 255, 255, 70 + 40*sin(frameCount*0.3));
-    if (theme === "pumpkin") fill(255, 120, 0, 90 + 40*sin(frameCount*0.3));
-    if (theme === "skull") fill(255, 255, 255, 80 + 40*sin(frameCount*0.3));
-    circle(p.p.x, p.p.y, PARTICLE_RADIUS * 1.6);
-  }
-
-  // --- spectral interior (new core) ---
-  let c = this.centerOfMass();
-  blendMode(ADD);
-  for (let i = 0; i < 3; i++) {
-    if (theme === "ghost") fill(120, 200, 255, 30 + 20*i);
-    if (theme === "pumpkin") fill(255, 80 + 60*i, 0, 25 + 15*i);
-    if (theme === "skull") fill(255, 220, 180, 25 + 15*i);
-    ellipse(c.x, c.y, this.radius * (0.6 + 0.1 * i) + 0.002*sin(frameCount*0.5+i));
-  }
-
-  // --- pulsating veins (motion energy) ---
-  blendMode(BLEND);
-  stroke(255, 200, 60, 35);
-  strokeWeight(0.0009);
-  for (let i=0;i<this.BP.length;i+=2){
-    let a=this.BP[i].p,b=this.BP[(i+3)%this.BP.length].p;
-    line(a.x,a.y,b.x,b.y);
-  }
-
-  // --- face ---
-  if (theme==="ghost") this.drawGhostFace(c,flicker);
-  else if (theme==="pumpkin") this.drawPumpkinFace(c,flicker);
-  else this.drawSkullFace(c,flicker);
-
-  drawingContext.shadowBlur=0;
-  pop();
-}
-	//------------------------------------------------------
-// 👻🎃💀 FINAL "SOUL-FANG" FACES — with glowing teeth
-//------------------------------------------------------
-
-// 👻 GHOST FACE — hollow eyes + eerie light mouth
-drawGhostFace(c, flicker){
-  push();
-  drawingContext.shadowBlur = 50;
-  drawingContext.shadowColor = "rgba(160,255,255,0.9)";
-  noStroke();
-
-  // Eyes
-  for (let s of [-1,1]){
-    let ex=c.x+s*0.018, ey=c.y-0.012;
-    fill(255,255,255,40); ellipse(ex,ey,0.03);
-    fill(0,0,0,250); ellipse(ex,ey,0.02);
-    fill(0,200,255,200); ellipse(ex,ey,0.009+0.002*sin(frameCount*0.3+s));
-  }
-
-  // Wailing mouth with ghostly teeth glow
-  fill(0,0,0,230); ellipse(c.x,c.y+0.018,0.034,0.018);
-  stroke(180,255,255,120); strokeWeight(0.0015);
-  for(let i=-3;i<=3;i++){
-    let x=c.x+i*0.004, y=c.y+0.018;
-    line(x,y,x,y+0.004*sin(frameCount*0.5+i));
-  }
-  pop();
-}
-
-// 🎃 PUMPKIN FACE — infernal eyes + sawtooth grin
-drawPumpkinFace(c,flicker){
-  push();
-  drawingContext.shadowBlur = 45;
-  drawingContext.shadowColor = "rgba(255,100,0,0.9)";
-  noStroke();
-
-  // Eyes
-  for (let s of [-1,1]){
-    let ex=c.x+s*0.018, ey=c.y-0.015;
-    fill(255,90,0,100); ellipse(ex,ey,0.022);
-    fill(0); ellipse(ex,ey,0.018);
-    fill(255,0,0,220);
-    ellipse(ex+0.001*sin(frameCount*0.6+s),ey,0.006,0.012);
-  }
-
-  // Old-style jagged glowing teeth (restored)
-  noFill();
-  stroke(255,120+80*flicker,0);
-  strokeWeight(0.004);
-  beginShape();
-  for(let i=-3;i<=3;i++){
-    let x=c.x+i*0.006;
-    let y=c.y+0.02+0.005*((i%2==0)?1:-1);
-    vertex(x,y);
-  }
-  endShape();
-
-  // Inner ember flicker behind teeth
-  noStroke(); fill(255,100,0,50+50*flicker);
-  ellipse(c.x,c.y+0.02,0.04,0.012);
-  pop();
-}
-
-// 💀 SKULL — bone shell, fire eyes, black skeletal fangs
-drawSkullFace(c,flicker){
-  push();
-  drawingContext.shadowBlur = 55;
-  drawingContext.shadowColor = "rgba(255,180,80,0.8)";
-  noStroke();
-
-  // Eyes – hellfire cores
-  for (let s of [-1,1]){
-    let ex=c.x+s*0.018, ey=c.y-0.012;
-    fill(255,140,0,130+80*flicker); ellipse(ex,ey,0.026);
-    fill(0); ellipse(ex,ey,0.018);
-    fill(255,30,0,240);
-    ellipse(ex,ey,0.007+0.003*sin(frameCount*0.5+s),0.014);
-  }
-
-  // Nose cavity
-  fill(0); triangle(c.x-0.005,c.y,c.x+0.005,c.y,c.x,c.y+0.012);
-
-  // Black teeth etched into bone
-  stroke(0,0,0,230);
-  strokeWeight(0.0025);
-  for(let i=-4;i<=4;i++){
-    let jitter=0.001*sin(frameCount*0.4+i);
-    line(c.x+i*0.004,c.y+0.02,c.x+i*0.004+jitter,c.y+0.026);
-  }
-
-  // Subtle bone glow around jaw
-  noStroke(); fill(255,200,120,40);
-  ellipse(c.x,c.y+0.024,0.04,0.014);
-  pop();
-}
+	
+	draw() {
+	  push();
+	  strokeWeight(PARTICLE_RADIUS);
+	  stroke(50, 0, 80, 80);
+	
+	  // --- flicker & theme selection ---
+	  let alpha = this.hit ? 180 : 230;
+	  let flicker = 0.6 + 0.4 * sin(frameCount * 0.1 + this.blobIndex);
+	  let theme = this.theme || ["ghost","pumpkin","skull"][floor(random(3))];
+	  this.theme = theme;
+	
+	  // --- body contour glow ---
+	  drawingContext.shadowBlur = 40;
+	  drawingContext.shadowColor =
+	    theme === "ghost" ? "rgba(170,240,255,0.9)" :
+	    theme === "pumpkin" ? "rgba(255,100,0,0.9)" :
+	    "rgba(255,240,180,0.8)";
+	  noStroke();
+	
+	  // --- dynamic fill flicker ---
+	  if (theme === "ghost") fill(210, 250, 255, 80 + 50*flicker);
+	  if (theme === "pumpkin") fill(255, 120 + 40*sin(frameCount*0.2), 0, 100 + 50*flicker);
+	  if (theme === "skull") fill(255, 255, 245, 90 + 40*flicker);
+	
+	  beginShape(); for (let p of this.BP) vertex(p.p.x, p.p.y); endShape(CLOSE);
+	
+	  // --- visible particles (integrated) ---
+	  for (let p of this.BP) {
+	    noStroke();
+	    if (theme === "ghost") fill(160, 255, 255, 70 + 40*sin(frameCount*0.3));
+	    if (theme === "pumpkin") fill(255, 120, 0, 90 + 40*sin(frameCount*0.3));
+	    if (theme === "skull") fill(255, 255, 255, 80 + 40*sin(frameCount*0.3));
+	    circle(p.p.x, p.p.y, PARTICLE_RADIUS * 1.6);
+	  }
+	
+	  // --- spectral interior (new core) ---
+	  let c = this.centerOfMass();
+	  blendMode(ADD);
+	  for (let i = 0; i < 3; i++) {
+	    if (theme === "ghost") fill(120, 200, 255, 30 + 20*i);
+	    if (theme === "pumpkin") fill(255, 80 + 60*i, 0, 25 + 15*i);
+	    if (theme === "skull") fill(255, 220, 180, 25 + 15*i);
+	    ellipse(c.x, c.y, this.radius * (0.6 + 0.1 * i) + 0.002*sin(frameCount*0.5+i));
+	  }
+	
+	  // --- pulsating veins (motion energy) ---
+	  blendMode(BLEND);
+	  stroke(255, 200, 60, 35);
+	  strokeWeight(0.0009);
+	  for (let i=0;i<this.BP.length;i+=2){
+	    let a=this.BP[i].p,b=this.BP[(i+3)%this.BP.length].p;
+	    line(a.x,a.y,b.x,b.y);
+	  }
+	
+	  // --- face ---
+	  if (theme==="ghost") this.drawGhostFace(c,flicker);
+	  else if (theme==="pumpkin") this.drawPumpkinFace(c,flicker);
+	  else this.drawSkullFace(c,flicker);
+	
+	  drawingContext.shadowBlur=0;
+	  pop();
+	}
+	
+		
+	
+	// 👻 GHOST FACE — hollow eyes + eerie light mouth
+	drawGhostFace(c, flicker){
+	  push();
+	  drawingContext.shadowBlur = 50;
+	  drawingContext.shadowColor = "rgba(160,255,255,0.9)";
+	  noStroke();
+	
+	  // Eyes
+	  for (let s of [-1,1]){
+	    let ex=c.x+s*0.018, ey=c.y-0.012;
+	    fill(255,255,255,40); ellipse(ex,ey,0.03);
+	    fill(0,0,0,250); ellipse(ex,ey,0.02);
+	    fill(0,200,255,200); ellipse(ex,ey,0.009+0.002*sin(frameCount*0.3+s));
+	  }
+	
+	  // Wailing mouth with ghostly teeth glow
+	  fill(0,0,0,230); ellipse(c.x,c.y+0.018,0.034,0.018);
+	  stroke(180,255,255,120); strokeWeight(0.0015);
+	  for(let i=-3;i<=3;i++){
+	    let x=c.x+i*0.004, y=c.y+0.018;
+	    line(x,y,x,y+0.004*sin(frameCount*0.5+i));
+	  }
+	  pop();
+	}
+	
+	// 🎃 PUMPKIN FACE — infernal eyes + sawtooth grin
+	drawPumpkinFace(c,flicker){
+	  push();
+	  drawingContext.shadowBlur = 45;
+	  drawingContext.shadowColor = "rgba(255,100,0,0.9)";
+	  noStroke();
+	
+	  // Eyes
+	  for (let s of [-1,1]){
+	    let ex=c.x+s*0.018, ey=c.y-0.015;
+	    fill(255,90,0,100); ellipse(ex,ey,0.022);
+	    fill(0); ellipse(ex,ey,0.018);
+	    fill(255,0,0,220);
+	    ellipse(ex+0.001*sin(frameCount*0.6+s),ey,0.006,0.012);
+	  }
+	
+	  // Old-style jagged glowing teeth (restored)
+	  noFill();
+	  stroke(255,120+80*flicker,0);
+	  strokeWeight(0.004);
+	  beginShape();
+	  for(let i=-3;i<=3;i++){
+	    let x=c.x+i*0.006;
+	    let y=c.y+0.02+0.005*((i%2==0)?1:-1);
+	    vertex(x,y);
+	  }
+	  endShape();
+	
+	  // Inner ember flicker behind teeth
+	  noStroke(); fill(255,100,0,50+50*flicker);
+	  ellipse(c.x,c.y+0.02,0.04,0.012);
+	  pop();
+	}
+	
+	// 💀 SKULL — bone shell, fire eyes, black skeletal fangs
+	drawSkullFace(c,flicker){
+	  push();
+	  drawingContext.shadowBlur = 55;
+	  drawingContext.shadowColor = "rgba(255,180,80,0.8)";
+	  noStroke();
+	
+	  // Eyes – hellfire cores
+	  for (let s of [-1,1]){
+	    let ex=c.x+s*0.018, ey=c.y-0.012;
+	    fill(255,140,0,130+80*flicker); ellipse(ex,ey,0.026);
+	    fill(0); ellipse(ex,ey,0.018);
+	    fill(255,30,0,240);
+	    ellipse(ex,ey,0.007+0.003*sin(frameCount*0.5+s),0.014);
+	  }
+	
+	  // Nose cavity
+	  fill(0); triangle(c.x-0.005,c.y,c.x+0.005,c.y,c.x,c.y+0.012);
+	
+	  // Black teeth etched into bone
+	  stroke(0,0,0,230);
+	  strokeWeight(0.0025);
+	  for(let i=-4;i<=4;i++){
+	    let jitter=0.001*sin(frameCount*0.4+i);
+	    line(c.x+i*0.004,c.y+0.02,c.x+i*0.004+jitter,c.y+0.026);
+	  }
+	
+	  // Subtle bone glow around jaw
+	  noStroke(); fill(255,200,120,40);
+	  ellipse(c.x,c.y+0.024,0.04,0.014);
+	  pop();
+	}
+	
 	drawBlobFace() {
 		push();
 		// Candle glow pulsation
@@ -428,12 +428,12 @@ drawSkullFace(c,flicker){
 			lookDir.normalize().mult(this.eyeSize * 0.3);
 		}
 		// Halloween glow
-drawingContext.shadowBlur = 20;
-drawingContext.shadowColor = "rgba(255, 140, 0, 0.8)";
+		drawingContext.shadowBlur = 20;
+		drawingContext.shadowColor = "rgba(255, 140, 0, 0.8)";
 
 		stroke(0);
 		strokeWeight(0.001);
-fill(255, 140, 0); // orange glow eyes
+		fill(255, 140, 0); // orange glow eyes
 		circle(leftEyePos.x, leftEyePos.y, this.eyeSize);
 		if (isBlinking) {
 			strokeWeight(0.002);
@@ -442,7 +442,7 @@ fill(255, 140, 0); // orange glow eyes
 			fill(0);
 			circle(leftEyePos.x + lookDir.x, leftEyePos.y + lookDir.y, this.pupilSize);
 		}
-fill(255, 120 + 40 * flicker, 0);
+		fill(255, 120 + 40 * flicker, 0);
 		circle(rightEyePos.x, rightEyePos.y, this.eyeSize);
 		if (isBlinking) {
 			strokeWeight(0.002);
@@ -451,14 +451,14 @@ fill(255, 120 + 40 * flicker, 0);
 			fill(0);
 			circle(rightEyePos.x + lookDir.x, rightEyePos.y + lookDir.y, this.pupilSize);
 		}
-// 🎃 spooky grin when compressed
-let mouthCenter = this.centerOfMass(); // renamed variable
-let mouthWidth = this.eyeSpacing * 2;
-let mouthHeight = this.eyeSize * 0.6;
-noFill();
-stroke(255, 100 + 60 * sin(frameCount * 0.3), 0);
-strokeWeight(0.004);
-arc(mouthCenter.x, mouthCenter.y + this.eyeSpacing * 0.8, mouthWidth, mouthHeight, 0, PI);
+		// 🎃 spooky grin when compressed
+		let mouthCenter = this.centerOfMass(); 
+		let mouthWidth = this.eyeSpacing * 2;
+		let mouthHeight = this.eyeSize * 0.6;
+		noFill();
+		stroke(255, 100 + 60 * sin(frameCount * 0.3), 0);
+		strokeWeight(0.004);
+		arc(mouthCenter.x, mouthCenter.y + this.eyeSpacing * 0.8, mouthWidth, mouthHeight, 0, PI);
 
 		pop();
 	}
@@ -473,6 +473,5 @@ arc(mouthCenter.x, mouthCenter.y + this.eyeSpacing * 0.8, mouthWidth, mouthHeigh
 	        vacc(this.BP[i].f, k_mem, correction);
 	    }
 	}
-
 
 }
