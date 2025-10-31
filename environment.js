@@ -128,16 +128,47 @@ e01.glowPhase = random(TWO_PI); // for flicker phase
 	draw() {
 		push();
 // 🌲 Full Halloween forest backdrop (draw first)
+// 🌲 Selectively reveal the background (bottom-right fade reveal)
 push();
-tint(255, 255 * 1.25); // boost brightness
+
+// Draw background normally but faded by a gradient mask
+let grad = drawingContext.createRadialGradient(
+  width * 0.85, height * 0.75, width * 0.05,   // inner bright center (bottom right)
+  width * 0.85, height * 0.75, width * 0.35    // outer fade radius
+);
+grad.addColorStop(0.0, 'rgba(255,255,255,0.95)');
+grad.addColorStop(0.4, 'rgba(255,255,255,0.6)');
+grad.addColorStop(0.7, 'rgba(255,255,255,0.2)');
+grad.addColorStop(1.0, 'rgba(255,255,255,0.0)');
+drawingContext.save();
+drawingContext.globalCompositeOperation = 'source-over';
+drawingContext.fillStyle = 'black';
+drawingContext.fillRect(0, 0, width, height);
+
+// Mask the background image using the radial fade
+drawingContext.globalCompositeOperation = 'destination-out';
+drawingContext.fillStyle = grad;
+drawingContext.fillRect(0, 0, width, height);
+drawingContext.restore();
+
+// Now draw the fog image through the fade
+tint(255, 220); // mild visibility
 image(bgImage, 0, 0, WIDTH, HEIGHT);
-tint(255, 200, 160); // slightly brighter
+pop();
+
+// subtle orange fog over reveal zone
+push();
+noStroke();
+fill(255, 180, 60, 10 + 5 * sin(frameCount * 0.05));
+ellipse(width * 0.85, height * 0.75, width * 0.6);
 pop();
 
 push();
 blendMode(ADD);
-fill(255, 140, 60, 10);
-rect(0, 0, width, height);
+// subtle glow pulses (remove harsh bottom box)
+fill(255, 180, 80, 6 + 4 * sin(frameCount * 0.1));
+ellipse(width/2, height/2, width * 1.2);
+
 pop();
 
 		
