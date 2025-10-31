@@ -304,8 +304,6 @@ class Blob {
 	  pop();
 	}
 	
-		
-	
 	// 👻 GHOST FACE — hollow eyes + eerie light mouth
 	drawGhostFace(c, flicker){
 		push();
