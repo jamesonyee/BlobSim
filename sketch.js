@@ -46,6 +46,7 @@ const STIFFNESS_BEND = 2.5;
 const STIFFNESS_PENALTY = 2000.0;
 const k_d                = 1.2;
 
+
 const COEFFICIENT_OF_RESTITUTION = 0.8;
 
 const MAX_IMPULSE_ITERATIONS = 16;
@@ -77,17 +78,24 @@ let detectedEdgeEdgeFailure = false;
 // Graph paper texture map:
 let bgImage;
 
+let titleFont;
+
+
 function preload() {
   bgImage = loadImage('night_forest_pumpkin.png');
+  titleFont = loadFont('creepster.ttf'); // 🎃 spooky display font
 }
 
-
+// apply image filters *after* it’s loaded (not inside preload)
 function setup() {
-	createCanvas(CANVAS_SIZE, CANVAS_SIZE);
-	background(100);
-	ellipseMode(RADIUS);
-	environment = new Environment();
+  createCanvas(CANVAS_SIZE, CANVAS_SIZE);
+  background(100);
+  ellipseMode(RADIUS);
+  environment = new Environment();
+	
+
 }
+
 
 /// Timesteps (w/ substeps) and draws everything.
 function draw() {
@@ -116,8 +124,48 @@ function draw() {
 		{
 			push();
 			background(0);
-			environment.draw();
-			for (let blob of blobs) blob.draw();
+// 👻 ghostly orbs drifting through mist
+if (!window.ghosts) {
+  window.ghosts = Array.from({length:10},()=>({
+    x: random(WIDTH), y: random(HEIGHT),
+    r: random(0.01,0.03), s: random(0.0004,0.0008)
+  }));
+}
+push();
+noStroke();
+for (let g of window.ghosts){
+  g.y -= g.s;
+  if(g.y < -g.r){ g.y = HEIGHT; g.x = random(WIDTH); }
+  fill(255,255,255,20 + 10*sin(frameCount*0.05 + g.x));
+  ellipse(g.x, g.y, g.r);
+}
+pop();
+
+
+environment.draw();
+
+// 🦇 flying bats layer (spooky silhouettes)
+if (!window.bats) {
+  window.bats = Array.from({length:8},()=>({
+    x: random(WIDTH), y: random(HEIGHT*0.5),
+    speed: random(0.0015,0.0025),
+    flap: random(TWO_PI)
+  }));
+}
+push();
+fill(0,0,0,200);
+noStroke();
+for (let b of window.bats){
+  b.x += b.speed;
+  if(b.x>WIDTH+0.05){ b.x=-0.05; b.y=random(HEIGHT*0.5); }
+  b.flap += 0.3;
+  let wing = 0.02 + 0.005*sin(b.flap);
+  triangle(b.x, b.y, b.x+0.03, b.y+wing, b.x-0.03, b.y+wing);
+}
+pop();
+
+for (let blob of blobs) blob.draw();
+
 			pop();
 			drawMouseForce();
 			drawOverlapEdges();
@@ -126,42 +174,76 @@ function draw() {
 		// 💡 subtle screen-wide light flicker
 push();
 blendMode(ADD);
-fill(255, 80, 0, 8 + 8 * sin(frameCount * 0.1));
+// global light flicker (campfire & moon mix)
+fill(255, 120, 40, 10 + 10 * sin(frameCount * 0.07));
 rect(0, 0, width, height);
+
+// moonlight pulse overlay
+fill(180, 180, 255, 4 + 4 * sin(frameCount * 0.03));
+rect(0, 0, width, height);
+
 pop();
 
 	}
 // 🌫️ rolling fog with noise pattern (adds depth + moonlight shimmer)
+// 💡 Neon glow enhancer (sharp + saturated pop look)
 push();
+blendMode(ADD);
 noStroke();
-for (let y = 0; y < height; y += 20) {
-  // vary opacity per row for animated mist bands
-  let fogRow = 20 + 15 * noise(frameCount * 0.005, y * 0.02);
-  fill(255, 150, 80, fogRow); // warmer orange mist
-  rect(0, y, width, 20);
-}
+
+// soft radial orange glow around center
+let r = dist(mouseX, mouseY, width/2, height/2) * 0.003;
+fill(255, 100 + 80 * sin(frameCount * 0.03), 20, 40);
+ellipse(width/2, height/2, width * (0.7 + 0.1 * sin(frameCount * 0.02)));
+
+// ambient blue rim light to balance orange tones
+fill(60, 200, 255, 20);
+ellipse(width/2, height * 0.7, width * 0.9);
+
+// subtle glow pulses
+fill(255, 180, 80, 10 + 5 * sin(frameCount * 0.1));
+rect(0, 0, width, height);
+
 pop();
 
 
-	push();
+
+// 🕯️ Cinematic glowing title
+push();
 textAlign(CENTER);
-textSize(48);
-fill(255, 120, 0, 180);
-	fill(255, 80 + 80 * sin(frameCount * 0.05), 0, 180);
+textFont(titleFont);
+textSize(70);
+let flicker = 150 + 80 * sin(frameCount * 0.05);
+fill(255, flicker, 0);
+stroke(255, 180, 40, 150);
+strokeWeight(3);
+drawingContext.shadowBlur = 40;
+drawingContext.shadowColor = color(255, 100, 0);
+text("🎃 Attack of the Blobs 🎃", width / 2, 80);
 
-text("🎃 Attack of the Blobs: Haunted Harvest 🎃", width / 2, 60);
+// subtitle shimmer
+textSize(26);
+fill(255, 200, 160, 200);
+drawingContext.shadowBlur = 20;
+drawingContext.shadowColor = color(255, 200, 160);
+text("Haunted Harvest Edition", width / 2, 120);
 pop();
 
+
 	pop();
 
-	push();
-	textSize(18);
-	noStroke();
-	fill(0);
-	text("#BLOBS: " + blobs.length, 10, 20);
-	text("#EDGES: " + edges.length, 10, 40);
-	text("#PARTICLES: " + particles.length, 10, 60);
-	pop();
+// 👻 Themed HUD overlay
+push();
+textFont(titleFont);
+textSize(20);
+fill(255, 150 + 50 * sin(frameCount * 0.05), 0, 180);
+noStroke();
+textAlign(LEFT);
+text(`#BLOBS: ${blobs.length}`, 20, 30);
+text(`#EDGES: ${edges.length}`, 20, 55);
+text(`#PARTICLES: ${particles.length}`, 20, 80);
+pop();
+
 
 	// --- global damping once per frame ---
 	for (let p of particles)
