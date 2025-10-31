@@ -66,6 +66,11 @@ const PENALTY_DISTANCE = PARTICLE_RADIUS * 2.0;   // was 8.0 → too large
 const AABB_PAD_PARTICLE = PARTICLE_RADIUS * 8.0;   // blob bound expansion
 const AABB_PAD_EDGE     = PARTICLE_RADIUS * 2.5;   // edge bound expansion
 
+// 🎭 Title animation state
+let titleFade = 255;        // current title opacity
+let titleDrip = [];         // active blood drips
+let titleEvaporating = false; // whether the title is currently fading
+
 //////// IMPORTANT ARRAYS OF THINGS /////////
 let particles = [];
 let edges = [];
@@ -194,6 +199,10 @@ pop();
 
 
 for (let blob of blobs) blob.draw();
+// 👀 Detect when blobs start moving => trigger title evaporation
+if (!titleEvaporating && blobs.length > 0 && blobs[0].centerOfMass().y > 0.2) {
+  titleEvaporating = true;
+}
 
 			pop();
 			drawMouseForce();
@@ -243,43 +252,75 @@ ellipse(width/2, height/2, width * 1.5);
 
 pop();
 
-// 🕯️ Cinematic rising-letter title
+
+	pop();
+
+// 🩸 TITLE EVAPORATION + BLOOD DRIP EFFECT
 push();
 textAlign(CENTER);
 textFont(titleFont);
-textSize(80);
+textSize(90);
 
-// flickering neon orange gradient glow
-for (let i = 0; i < 3; i++) {
-  let alpha = 120 - i * 30;
-  fill(255, 120 + 40 * i, 0, alpha);
-  text("ATTACK OF THE BLOBS", width/2, 85 - i * 2);
+// gradually fade out when blobs descend
+if (titleEvaporating && titleFade > 0) {
+titleFade -= 8.4; // faster fade (half the time)
+  // spawn new blood drips randomly
+if (random() < 0.55) {
+    titleDrip.push({
+      x: width/2 - 200 + random(400),
+      y: 150,
+      speed: random(1,3),
+      alpha: 255,
+      size: random(4,8)
+    });
+  }
 }
 
-// 3D parallax shimmer per letter
+// main glowing title
+for (let i = 0; i < 4; i++) {
+  let glow = 100 - i * 20;
+  fill(255, 130 + i * 20, 0, titleFade * (glow / 150));
+  text("ATTACK OF THE BLOBS", width/2 + i * 0.5, 90 - i);
+}
+
+// flickering light shimmer per letter
 let title = "ATTACK OF THE BLOBS";
 for (let i = 0; i < title.length; i++) {
   let ch = title[i];
-  let x = width/2 - textWidth(title)/2 + textWidth(title.substring(0, i));
-  let y = 85 + 5 * sin(frameCount*0.06 + i*0.8);
-  let flicker = 200 + 55 * sin(frameCount * 0.05 + i);
-  fill(255, 160, 30, flicker);
-  stroke(255, 200, 80, 160);
-  strokeWeight(3);
+  let x = width / 2 - textWidth(title) / 2 + textWidth(title.substring(0, i));
+  let y = 90 + 5 * sin(frameCount * 0.05 + i * 0.8);
+  let flicker = 150 + 50 * sin(frameCount * 0.03 + i);
+  fill(255, 160, 40, min(titleFade, flicker));
+  stroke(255, 220, 120, titleFade * 0.8);
+  strokeWeight(2.5);
   text(ch, x, y);
 }
 
-// 🎃 subtitle: smoky fade
+// 💀 subtitle: slowly fades too
+textFont(subFont);
 textSize(28);
-let subAlpha = 180 + 75 * sin(frameCount * 0.02);
-fill(255, 220, 180, subAlpha);
+fill(255, 40, 0, titleFade * 0.8);
 noStroke();
-text("Haunted Harvest Edition", width/2, 130 + 3*sin(frameCount*0.04));
+text("Haunted Harvest Edition", width/2, 135 + 2*sin(frameCount*0.05));
+
+// 🩸 dripping blood simulation
+noStroke();
+for (let i = titleDrip.length - 1; i >= 0; i--) {
+  let d = titleDrip[i];
+  d.y += d.speed;
+  d.alpha -= 4;
+  fill(255, 0, 0, d.alpha);
+  ellipse(d.x, d.y, d.size, d.size * 1.3);
+  if (d.alpha <= 0 || d.y > height * 0.9) titleDrip.splice(i, 1);
+}
+
+// 🔥 optional subtle smoke fade effect around text
+noStroke();
+for (let i = 0; i < 5; i++) {
+  fill(255, 150, 80, titleFade * 0.03);
+  ellipse(width/2 + random(-200, 200), 100 + random(-20, 20), random(100, 200), 30);
+}
 pop();
-
-
-
-	pop();
 
 // 🎃 Floating HUD (carved pumpkin counters)
 push();
