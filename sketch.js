@@ -45,8 +45,6 @@ const STIFFNESS_BEND = 2.5;
 
 const STIFFNESS_PENALTY = 2000.0;
 const k_d                = 1.2;
-
-
 const COEFFICIENT_OF_RESTITUTION = 0.8;
 
 const MAX_IMPULSE_ITERATIONS = 16;
@@ -93,17 +91,12 @@ function preload() {
   subFont = loadFont('nosifer.ttf'); // 💀 dripping-blood HUD font
 }
 
-
-// apply image filters *after* it’s loaded (not inside preload)
 function setup() {
   createCanvas(CANVAS_SIZE, CANVAS_SIZE);
   background(100);
   ellipseMode(RADIUS);
   environment = new Environment();
-	
-
 }
-
 
 /// Timesteps (w/ substeps) and draws everything.
 function draw() {
@@ -311,7 +304,6 @@ for (let i = titleDrip.length - 1; i >= 0; i--) {
   if (d.alpha <= 0 || d.y > height * 0.9) titleDrip.splice(i, 1);
 }
 
-// 🔥 optional subtle smoke fade effect around text
 noStroke();
 for (let i = 0; i < 5; i++) {
   fill(255, 150, 80, titleFade * 0.03);
@@ -390,7 +382,6 @@ for (let i=0;i<3;i++){
 }
 drawingContext.restore(); // close the clip
 
-// 🌍 Now draw global spooky elements BELOW HUD (visible everywhere)
 
 // === 1️⃣ Floating Ghost Sprites ===
 if (!window.hudGhosts) {
@@ -450,7 +441,6 @@ for (let s of window.hudSouls) {
   ellipse(s.x, s.y, 8 + 2*sin(frameCount * 0.08 + s.phase));
 }
 
-
 // === 4️⃣ Pumpkin Sparks Burst ===
 for (let i=0; i<5; i++){
   let px = random(width);
@@ -459,7 +449,6 @@ for (let i=0; i<5; i++){
   ellipse(px, py, random(2,4));
 }
 pop();
-
 
 	// --- global damping once per frame ---
 	for (let p of particles)
