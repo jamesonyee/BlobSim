@@ -157,8 +157,9 @@ noStroke();
 for (let g of window.ghosts){
   g.y -= g.s;
   if(g.y < -g.r){ g.y = HEIGHT; g.x = random(WIDTH); }
-  fill(255,255,255,20 + 10*sin(frameCount*0.05 + g.x));
-  ellipse(g.x, g.y, g.r);
+fill(255,255,255,0); // make all ghosts invisible
+  if (g.x < 0.3 && g.y < 0.15) continue; // skip drawing ghosts overlapping HUD
+	ellipse(g.x, g.y, g.r);
 }
 pop();
 
@@ -221,27 +222,22 @@ ellipse(width/2, height/2, width * 1.4);
 pop();
 
 	}
-// 🌫️ rolling fog with noise pattern (adds depth + moonlight shimmer)
+
 // 💡 Neon glow enhancer (sharp + saturated pop look)
 push();
-blendMode(ADD);
+// use normal blending instead of ADD → prevents haze stacking
+blendMode(BLEND);
 noStroke();
 
-// soft radial orange glow around center
-let r = dist(mouseX, mouseY, width/2, height/2) * 0.003;
-fill(255, 100 + 80 * sin(frameCount * 0.03), 20, 40);
-ellipse(width/2, height/2, width * (0.7 + 0.1 * sin(frameCount * 0.02)));
+// a tight, subtle orange center light
+fill(255, 130, 40, 25);
+ellipse(width/2, height/2, width * 0.4);
 
-// ambient blue rim light to balance orange tones
-fill(60, 200, 255, 20);
-ellipse(width/2, height * 0.7, width * 0.9);
-
-// subtle glow pulses
-fill(255, 180, 80, 6 + 4 * sin(frameCount * 0.1));
-ellipse(width/2, height/2, width * 1.3);
-
-
+// optional tiny blue accent (barely visible)
+fill(100, 200, 255, 10);
+ellipse(width/2, height * 0.7, width * 0.5);
 pop();
+
 
 // 🌈 Haunted world color pulse (slow hue drift)
 push();
@@ -328,15 +324,17 @@ textFont(subFont);
 textSize(26);
 textAlign(LEFT);
 
-// 👻 floating fog behind the HUD
+// 👻 floating fog behind the HUD (completely transparent to prevent white circles)
 push();
 noStroke();
 blendMode(SOFT_LIGHT);
 for (let i = 0; i < 4; i++) {
-  fill(255, 140, 30, 6 + 3 * sin(frameCount * 0.07 + i));
-  ellipse(110 + i * 10, 65 + i * 5, 180, 70);
+  // completely invisible background layer to disable HUD glow
+  fill(255, 140, 30, 0);
+  ellipse(110 + i * 10, 65 + i * 5, 80, 30);
 }
 pop();
+
 
 // 💀 eerie flicker colors (orange–amber glow)
 let baseGlow = 140 + 70 * sin(frameCount * 0.07);
@@ -366,29 +364,102 @@ fill(140, 255, 100, 220);
 stroke(90, decayPulse, 40, 180);
 strokeWeight(2.5);
 text(`💀 PARTICLES: ${particles.length}`, 25, 100);
+// 🕯️👻🦇 HALLOWEEN HUD EFFECTS — stacked visual layers
+push();
 
-// faint toxic mist shimmer
-noStroke();
-fill(180, 255, 100, 40 + 30 * sin(frameCount * 0.06));
-ellipse(140, 95, 80 + 20 * sin(frameCount * 0.05), 30);
+// 🔒 restrict visuals to the HUD area only (no white circles bleeding out)
+drawingContext.save();
+drawingContext.beginPath();
+drawingContext.rect(0, 0, 300, 130); // clip region for top-left HUD
+drawingContext.clip();
 
-// ✨ flickering ember sparks around HUD
 blendMode(ADD);
 noStroke();
-for (let i = 0; i < 6; i++) {
-  let ex = 60 + random(-20, 60);
-  let ey = 50 + random(-10, 70);
-  fill(255, 120 + random(80), 40, random(40, 100));
-  ellipse(ex, ey, random(3, 5));
+
+// === 1️⃣ Floating Ghost Sprites ===
+if (!window.hudGhosts) {
+  window.hudGhosts = Array.from({length:3},()=>({
+    x: random(40,180),
+    y: random(30,110),
+    drift: random(0.002,0.004),
+    phase: random(TWO_PI)
+  }));
+}
+for (let g of window.hudGhosts) {
+  g.x += 0.15*sin(frameCount*g.drift);
+  g.y += 0.1*cos(frameCount*g.drift + g.phase);
+  fill(255,255,255,50 + 40*sin(frameCount*0.03 + g.phase));
+  ellipse(g.x, g.y, 18 + 4*sin(frameCount*0.05 + g.phase), 14);
+  fill(0,0,0,80);
+  ellipse(g.x-4, g.y-1, 3,3);
+  ellipse(g.x+4, g.y-1, 3,3);
 }
 
-// 🌫️ faint mist rolling over counters
-blendMode(SOFT_LIGHT);
-for (let i = 0; i < 3; i++) {
-  fill(255, 150, 50, 10 + 5 * sin(frameCount * 0.04 + i));
-  rect(15, 25 + i * 20, 230, 15);
+// === 2️⃣ Tiny Flying Bats ===
+if (!window.hudBats) {
+  window.hudBats = Array.from({length:5},()=>({
+    x: random(15,220),
+    y: random(20,120),
+    speed: random(0.8,1.3),
+    flap: random(TWO_PI)
+  }));
 }
+fill(0,0,0,150);
+for (let b of window.hudBats){
+  b.x += 0.3*b.speed;
+  if(b.x>230){ b.x=10; b.y=random(30,120); }
+  b.flap += 0.4*b.speed;
+  let wing = 6 + 2*sin(b.flap);
+  triangle(b.x, b.y, b.x+wing, b.y+2, b.x-wing, b.y+2);
+}
+
+// === 3️⃣ Dripping Candle Flames next to stats ===
+for (let i=0;i<3;i++){
+  let cx = 250;
+  let cy = 38 + i*30;
+  let flicker = 150 + 80*sin(frameCount*0.2 + i);
+  fill(255, 180, 60, flicker);
+  ellipse(cx, cy, 5 + 1*sin(frameCount*0.4 + i));
+  fill(255, 100, 20, 180);
+  rect(cx-1, cy, 2, 10, 1);
+  if (random()<0.01){
+    let dropY = cy + 10 + random(10);
+    fill(255,150,40,180);
+    ellipse(cx, dropY, 2,4);
+  }
+}
+
+// === 4️⃣ Floating Eyeballs Watching Player ===
+if (!window.hudEyes) {
+  window.hudEyes = Array.from({length:2},()=>({
+    baseX: random(70,150),
+    baseY: random(40,90),
+    r: 10
+  }));
+}
+for (let e of window.hudEyes){
+  let lookX = map(mouseX,0,width,-2,2);
+  let lookY = map(mouseY,0,height,-1,1);
+  fill(255,255,240,200);
+  ellipse(e.baseX, e.baseY, e.r*2);
+  fill(100,0,0,220);
+  ellipse(e.baseX+lookX, e.baseY+lookY, e.r*0.8);
+  fill(0);
+  ellipse(e.baseX+lookX*1.2, e.baseY+lookY*1.2, e.r*0.4);
+}
+
+// === 5️⃣ Pumpkin Sparks Burst ===
+for (let i=0; i<4; i++){
+  let px = 60 + random(-20,200);
+  let py = 40 + random(-10,90);
+  fill(255, 140 + random(60), 30, 100);
+  ellipse(px, py, random(2,4));
+}
+
+// 🧹 cleanup: stop bleed outside HUD
+drawingContext.restore();
 pop();
+
 
 
 	// --- global damping once per frame ---
