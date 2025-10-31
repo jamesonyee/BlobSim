@@ -124,6 +124,19 @@ function draw() {
 		{
 			push();
 			background(0);
+			// 🌫️ Parallax drifting fog layer (cinematic depth)
+push();
+blendMode(SOFT_LIGHT);
+noStroke();
+for (let i = 0; i < 3; i++) {
+  let speed = 0.0001 + 0.0002 * i;
+  let offset = (frameCount * speed) % 1;
+  let y = (i * 0.3 + offset) * HEIGHT;
+  fill(255, 180, 80, 15 - i * 5);
+  rect(0, y, WIDTH, HEIGHT * 0.35);
+}
+pop();
+
 // 👻 ghostly orbs drifting through mist
 if (!window.ghosts) {
   window.ghosts = Array.from({length:10},()=>({
@@ -164,6 +177,19 @@ for (let b of window.bats){
 }
 pop();
 
+			// 🎃 Local glow around each blob (reactive pumpkin light)
+push();
+blendMode(ADD);
+noStroke();
+for (let blob of blobs) {
+  let c = blob.centerOfMass();
+  let pulse = 80 + 50 * sin(frameCount * 0.05 + blob.blobIndex);
+  fill(255, 120, 30, pulse);
+  ellipse(c.x * width, c.y * height, width * 0.12);
+}
+pop();
+
+
 for (let blob of blobs) blob.draw();
 
 			pop();
@@ -174,13 +200,11 @@ for (let blob of blobs) blob.draw();
 		// 💡 subtle screen-wide light flicker
 push();
 blendMode(ADD);
-// global light flicker (campfire & moon mix)
-fill(255, 120, 40, 10 + 10 * sin(frameCount * 0.07));
-rect(0, 0, width, height);
 
-// moonlight pulse overlay
+fill(255, 120, 40, 10 + 10 * sin(frameCount * 0.07));
+ellipse(width/2, height/2, width * 1.2);
 fill(180, 180, 255, 4 + 4 * sin(frameCount * 0.03));
-rect(0, 0, width, height);
+ellipse(width/2, height/2, width * 1.4);
 
 pop();
 
@@ -201,32 +225,41 @@ fill(60, 200, 255, 20);
 ellipse(width/2, height * 0.7, width * 0.9);
 
 // subtle glow pulses
-fill(255, 180, 80, 10 + 5 * sin(frameCount * 0.1));
-rect(0, 0, width, height);
+fill(255, 180, 80, 6 + 4 * sin(frameCount * 0.1));
+ellipse(width/2, height/2, width * 1.3);
+
 
 pop();
 
+// 🌈 Haunted world color pulse (slow hue drift)
+push();
+blendMode(OVERLAY);
+let hueShift = 40 + 40 * sin(frameCount * 0.003);
+fill(255, 100 + hueShift, 40, 6);
+ellipse(width/2, height/2, width * 1.5);
 
+pop();
 
-// 🕯️ Cinematic glowing title
+// 🕯️ Cinematic rising-letter title
 push();
 textAlign(CENTER);
 textFont(titleFont);
 textSize(70);
-let flicker = 150 + 80 * sin(frameCount * 0.05);
-fill(255, flicker, 0);
-stroke(255, 180, 40, 150);
-strokeWeight(3);
-drawingContext.shadowBlur = 40;
-drawingContext.shadowColor = color(255, 100, 0);
-text("🎃 Attack of the Blobs 🎃", width / 2, 80);
-
-// subtitle shimmer
+let title = "ATTACK OF THE BLOBS";
+for (let i = 0; i < title.length; i++) {
+  let ch = title[i];
+  let x = width/2 - textWidth(title)/2 + textWidth(title.substring(0, i));
+  let y = 80 + 6 * sin(frameCount*0.05 + i*0.6);
+  let alpha = 180 + 75 * sin(frameCount*0.04 + i);
+  fill(255, alpha, 0);
+  stroke(255,180,40,120);
+  strokeWeight(2);
+  text(ch, x, y);
+}
 textSize(26);
-fill(255, 200, 160, 200);
-drawingContext.shadowBlur = 20;
-drawingContext.shadowColor = color(255, 200, 160);
-text("Haunted Harvest Edition", width / 2, 120);
+fill(255, 210, 180, 200);
+noStroke();
+text("Haunted Harvest Edition", width/2, 120 + 4*sin(frameCount*0.03));
 pop();
 
 
@@ -248,6 +281,19 @@ pop();
 	// --- global damping once per frame ---
 	for (let p of particles)
 		p.v.mult(0.99985);
+
+	// 🔥 Floating embers
+if (!window.embers)
+  window.embers = Array.from({length:50},()=>({x:random(width),y:random(height),s:random(0.5,1.5)}));
+push();
+blendMode(ADD);
+noStroke();
+for (let e of window.embers){
+  e.y -= 0.5*e.s; if (e.y<0) {e.y=height; e.x=random(width);}
+  fill(255,140+random(60),30,150);
+  ellipse(e.x,e.y,2*e.s);
+}
+pop();
 
 }
 
