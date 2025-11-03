@@ -84,6 +84,8 @@ let bgImage;
 let titleFont;
 let subFont; // 👻 new HUD / subtitle font (Nosifer)
 
+let showGrid = true;
+
 
 function preload() {
   bgImage = loadImage('night_forest_pumpkin.png');
@@ -96,6 +98,7 @@ function setup() {
   background(100);
   ellipseMode(RADIUS);
   environment = new Environment();
+  grid2D = new GridCheck2D(25, WIDTH, 25, HEIGHT);
 }
 
 /// Timesteps (w/ substeps) and draws everything.
@@ -158,6 +161,12 @@ pop();
 
 
 environment.draw();
+
+if(showGrid){
+  grid2D.draw();
+  grid2D.drawDebug();
+}
+
 
 // 🦇 flying bats layer (spooky silhouettes)
 if (!window.bats) {
@@ -531,7 +540,10 @@ function keyPressed() {
 	} else if (key == 'q') {
 		clear();
 		lineIndex = 0.0;
-	}
+  } else if (key == 'g' || 'G') {
+    showGrid = !showGrid;
+    console.log('grid toggled');  
+  }
 }
 
 function advanceTime(dt) {
@@ -747,39 +759,29 @@ function processImpulse(p, edge, e, dt) {
 
 function gatherParticleForces_Penalty() {
 	const k_p = STIFFNESS_PENALTY;
-	const k_d_penalty = k_d * 0.5; // lighter damping for environment
-	let envEdges = environment.getEdges();
-
-	// --- blob vs environment ---
-	for (let blob of blobs) {
-		for (let edge of envEdges) {
-			const d0 = edge.isRigid() ? PARTICLE_RADIUS * 3.5 : PENALTY_DISTANCE;
-
-			let edgeAABB = getEdgeAABB(edge);
-			if (!aabbOverlap(blob.aabb_min, blob.aabb_max, edgeAABB.min, edgeAABB.max))
-				continue;
-			for (let p of blob.BP)
-				processPenalty(p, edge, k_p, k_d_penalty, d0);
-		}
-	}
-
-	// --- blob vs blob ---
-	for (let i = 0; i < blobs.length; i++) {
-		for (let j = i + 1; j < blobs.length; j++) {
-			let blobA = blobs[i];
-			let blobB = blobs[j];
-			if (!aabbOverlap(blobA.aabb_min, blobA.aabb_max, blobB.aabb_min, blobB.aabb_max))
-				continue;
-
-			for (let p of blobA.BP)
-				for (let edge of blobB.BE)
-					processPenalty(p, edge, k_p, k_d_penalty, PENALTY_DISTANCE);
-
-			for (let p of blobB.BP)
-				for (let edge of blobA.BE)
-					processPenalty(p, edge, k_p, k_d_penalty, PENALTY_DISTANCE);
-		}
-	}
+    const k_d_penalty = k_d * 0.5;
+    
+    // Populate the grid using the class method
+    grid2D.populateGrid(blobs, environment);
+    
+    // For each blob particle, check only nearby objects in the grid
+    for (let blob of blobs) {
+        for (let p of blob.BP) {
+            // Use the helper method to get nearby objects
+            const nearbyObjects = grid2D.getObjectsNearParticle(p);
+            
+            // Check each nearby object for collisions
+            for (let obj of nearbyObjects) {
+                if (obj instanceof Edge) {
+                    // Skip same-blob edges
+                    if (obj.q.blob && p.blob === obj.q.blob) continue;
+                    
+                    const d0 = obj.isRigid() ? PARTICLE_RADIUS * 3.5 : PENALTY_DISTANCE;
+                    processPenalty(p, obj, k_p, k_d_penalty, d0);
+                }
+            }
+        }
+    }
 }
 
 
@@ -802,14 +804,3 @@ function createEdge(particle0, particle1) {
 	return edge;
 }
 
-/*
-// "press enter to continue" utility for noLoop() mode
-function keyPressed() {
-	if (keyCode == ENTER) {
-		redraw();
-	} else if (key == 'q') {
-		clear();
-		lineIndex = 0.0;
-	}
-}
-*/

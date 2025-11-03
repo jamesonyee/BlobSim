@@ -59,7 +59,7 @@ function vacc(v, scale, w) {
 // Returns a*X for scalar a and Vector X.
 // @returns A new Vector.
 function vax(a, X) {
-	return vec2(a*X.x + Y.x, a*X.y+Y.y); // :P
+	return vec2(a*X.x, a*X.y); // :P
 }
 // Returns a*X + Y for scalar a and Vectors X & Y.
 // @returns A new Vector.
