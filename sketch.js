@@ -98,7 +98,7 @@ function setup() {
   background(100);
   ellipseMode(RADIUS);
   environment = new Environment();
-  grid2D = new GridCheck2D(25, WIDTH, 25, HEIGHT);
+  grid2D = new GridCheck2D(50, WIDTH, 50, HEIGHT);
 }
 
 /// Timesteps (w/ substeps) and draws everything.
@@ -540,7 +540,7 @@ function keyPressed() {
 	} else if (key == 'q') {
 		clear();
 		lineIndex = 0.0;
-  } else if (key == 'g' || 'G') {
+  } else if (key == 'g' || key == 'G') {
     showGrid = !showGrid;
     console.log('grid toggled');  
   }
@@ -578,6 +578,50 @@ function advanceTime(dt) {
 	verifyNoEdgeEdgeOverlap();
 }
 
+
+function applyPointEdgeCollisionFilter(dt) {
+	const e = COEFFICIENT_OF_RESTITUTION;
+  const k_p = STIFFNESS_PENALTY;
+  const k_d_penalty = k_d * 0.5;
+
+	for (let iter = 0; iter < MAX_IMPULSE_ITERATIONS; iter++) {
+		// === PART 1: BLOB-vs-ENVIRONMENT ===
+		for (let blob of blobs) {
+			for (let p of blob.BP) {
+				const nearbyObjects = grid2D.getObjectsNearParticle(p);
+				
+        for (let obj of nearbyObjects) {
+          if(obj instanceof Edge) {
+            if (obj.q.blob && p.blob === obj.q.blob) continue;
+
+            const d0 = obj.isRigid() ? PARTICLE_RADIUS * 3.5 : PENALTY_DISTANCE;
+            processPenalty(p, obj, k_p, k_d_penalty, d0);
+          }
+        }
+			}
+		}
+
+		// === PART 2: BLOB-vs-BLOB ===
+		for (let i = 0; i < blobs.length; i++) {
+			for (let j = i + 1; j < blobs.length; j++) {
+				let blobA = blobs[i];
+				let blobB = blobs[j];
+				if (!aabbOverlap(blobA.aabb_min, blobA.aabb_max, blobB.aabb_min, blobB.aabb_max))
+					continue;
+
+				for (let p of blobA.BP)
+					for (let edge of blobB.BE)
+						processImpulse(p, edge, e, dt);
+
+				for (let p of blobB.BP)
+					for (let edge of blobA.BE)
+						processImpulse(p, edge, e, dt);
+			}
+		}
+	}
+}
+
+/*
 function applyPointEdgeCollisionFilter(dt) {
 	const e = COEFFICIENT_OF_RESTITUTION;
 	let envEdges = environment.getEdges();
@@ -613,6 +657,8 @@ function applyPointEdgeCollisionFilter(dt) {
 		}
 	}
 }
+*/
+
 
 function createEdge(particle0, particle1) {
 	let edge = new Edge(particle0, particle1);
@@ -702,6 +748,7 @@ function processPenalty(p, edge, k_p, k_d, d0) {
 	}
 }
 
+
 function processImpulse(p, edge, e, dt) {
     if (p === edge.q || p === edge.r) return;
     if (p.blob && edge.q.blob && p.blob === edge.q.blob) return;
@@ -757,6 +804,8 @@ function processImpulse(p, edge, e, dt) {
     }
 }
 
+
+
 function gatherParticleForces_Penalty() {
 	const k_p = STIFFNESS_PENALTY;
     const k_d_penalty = k_d * 0.5;
@@ -778,6 +827,8 @@ function gatherParticleForces_Penalty() {
                     
                     const d0 = obj.isRigid() ? PARTICLE_RADIUS * 3.5 : PENALTY_DISTANCE;
                     processPenalty(p, obj, k_p, k_d_penalty, d0);
+
+
                 }
             }
         }
@@ -803,4 +854,3 @@ function createEdge(particle0, particle1) {
 	edges.push(edge);
 	return edge;
 }
-
